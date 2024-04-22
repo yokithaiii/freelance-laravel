@@ -25,7 +25,7 @@ const props = defineProps({
                         Назад
                     </a>
                 </div>
-                <div v-if="!user.user_info" class="container mx-auto py-8">
+                <div v-if="!user.detail_info" class="container mx-auto py-8">
                     <div class="w-full">
                         <div class="bg-white shadow rounded-lg p-6">
                             <p>No profile information available.</p>
@@ -37,15 +37,15 @@ const props = defineProps({
                         <div class="col-span-4 sm:col-span-3">
                             <div class="bg-white shadow rounded-lg p-6">
                                 <div class="flex flex-col items-start">
-                                    <img :src="`/storage/${ user.user_info.avatar }`" class="w-full h-auto max-h-[250px] object-cover bg-gray-300 rounded-md mb-4 shrink-0"/>
-                                    <h2 class="text-xl font-bold">{{ user.user_info.name }}</h2>
-                                    <p class="text-gray-700">{{ user.user_info.profession }}</p>
+                                    <img :src="`/storage/${ user.detail_info.avatar }`" class="w-full h-auto max-h-[250px] object-cover bg-gray-300 rounded-md mb-4 shrink-0"/>
+                                    <h2 class="text-xl font-bold">{{ user.detail_info.name }}</h2>
+                                    <p class="text-gray-700">{{ user.detail_info.profession }}</p>
                                     <div class="mt-2 flex flex-wrap gap-2">
-                                        <span v-for="(skill, index) in JSON.parse(user.user_info.skills)" :key="index" id="badge-dismiss-default" class="inline-flex items-center px-2 py-1 text-sm font-medium text-gray-800 bg-gray-100 rounded">
+                                        <span v-for="(skill, index) in JSON.parse(user.detail_info.skills)" :key="index" id="badge-dismiss-default" class="inline-flex items-center px-2 py-1 text-sm font-medium text-gray-800 bg-gray-100 rounded">
                                             {{ skill }}
                                         </span>
                                     </div>
-                                    <p class="mt-2 text-gray-700">Размещено заказов: {{ user.user_info.jobs_count }}</p>
+                                    <p class="mt-2 text-gray-700">Размещено заказов: {{ user.detail_info.jobs_count }}</p>
                                 </div>
                                 <hr class="my-6 border-t border-gray-300">
                                 <div class="flex flex-col">
@@ -58,12 +58,12 @@ const props = defineProps({
                                         </li>
                                         <li class="mb-2">
                                             <a href="#">
-                                                wa: {{ user.user_info.contact_phone }}
+                                                wa: {{ user.detail_info.contact_phone }}
                                             </a>
                                         </li>
                                         <li class="mb-2">
                                             <a href="#">
-                                                tg: @{{ user.user_info.contact_telegram }}
+                                                tg: @{{ user.detail_info.contact_telegram }}
                                             </a>
                                         </li>
                                     </ul>
@@ -74,7 +74,7 @@ const props = defineProps({
                             <div class="bg-white shadow rounded-lg p-6">
                                 <h2 class="text-xl font-bold mb-4">About Me</h2>
                                 <p class="text-gray-700">
-                                    {{ user.user_info.about_text }}
+                                    {{ user.detail_info.about_text }}
                                 </p>
                             </div>
                         </div>

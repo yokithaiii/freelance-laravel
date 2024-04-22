@@ -70,8 +70,8 @@ const showingNavigationDropdown = ref(false);
                                                         aria-haspopup="true">
                                                     <span class="absolute -inset-1.5"></span>
                                                     <span class="sr-only">Open user menu</span>
-                                                    <img v-if="$page.props.auth.user_info" class="h-9 w-9 rounded-full"
-                                                         :src="`/storage/${$page.props.auth.user_info.avatar}`" alt="">
+                                                    <img v-if="$page.props.auth.detail_info" class="h-9 w-9 rounded-full"
+                                                         :src="`/storage/${$page.props.auth.detail_info.avatar}`" alt="">
 
                                                     <div v-else
                                                          class="relative w-9 h-9 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">

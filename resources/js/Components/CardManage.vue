@@ -107,28 +107,12 @@ onMounted(initModal);
         <div class="flex flex-col gap-1" v-if="files.length > 0">
             <p>Прикрепленные файлы:</p>
             <div v-for="file in files" :key="file.id">
-                <a class="flex gap-1 items-center" :href="`/storage/${ file.url }`" target="_blank">
+                <a class="flex gap-1 items-center" :href="`/storage/${ file.file_path }`" target="_blank">
                     <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                         <path fill-rule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7Zm.394 9.553a1 1 0 0 0-1.817.062l-2.5 6A1 1 0 0 0 8 19h8a1 1 0 0 0 .894-1.447l-2-4A1 1 0 0 0 13.2 13.4l-.53.706-1.276-2.553ZM13 9.5a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-sm text-blue-700">{{file.name}}</span>
+                    <span class="text-sm text-blue-700">{{file.file_name}}</span>
                 </a>
-            </div>
-        </div>
-        <div class="mt-4" v-if="user">
-            <div class="flex items-start space-x-4">
-                <img class="w-14 h-14 rounded-sm"  :src="`/storage/${ user.avatar }`" alt="">
-                <div class="flex flex-col">
-                    <span class="font-medium dark:text-white">
-                        Заказчик: <a :href="`/user/${ user.login }`" class="text-blue-700">{{ user.login }}</a>
-                        <span v-if="user.id == auth_id" class="ml-2 bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
-                            Это вы
-                        </span>
-                    </span>
-                    <span class="font-medium dark:text-white">
-                        Размещено заказов: {{ count }}
-                    </span>
-                </div>
             </div>
         </div>
         <div class="flex items-end justify-between">

@@ -283,7 +283,7 @@ onMounted(initDatepicker);
                                                     </svg>
                                                 </div>
                                             </div>
-                                            <img :src="`/storage/${ file.url }`" class="h-24 w-24 object-cover rounded-md" />
+                                            <img :src="`/storage/${ file.file_path }`" class="h-24 w-24 object-cover rounded-md" />
                                         </div>
                                     </div>
                                 </div>
