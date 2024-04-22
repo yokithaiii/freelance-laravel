@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserDetailInfo;
+use App\Models\UserRole;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -29,19 +31,30 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'login' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => 'required|string',
         ]);
 
+        $role = UserRole::where('name', $request->role)->firstOrFail();
+        if (!$role) {
+            return response()->json(['error' => 'user role not found'], 404);
+        }
+
         $user = User::create([
-            'name' => $request->name,
+            'login' => $request->login,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+        $detailInfo = new UserDetailInfo([
+            'role_id' => $role->id,
+        ]);
+        $user->detailInfo()->save($detailInfo);
 
         event(new Registered($user));
 
