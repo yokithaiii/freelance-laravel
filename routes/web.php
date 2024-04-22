@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -46,7 +47,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile/detail', [ProfileController::class, 'show'])->name('profile.show');
-    Route::post('/profile/detail', [ProfileController::class, 'updateProfileDetails'])->name('profile.updateDetail');
+    Route::post('/profile/detail', [ProfileController::class, 'updateDetails'])->name('profile.updateDetail');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/user/{login}', [UserController::class, 'show'])->name('user.show');
 });
 
 require __DIR__.'/auth.php';

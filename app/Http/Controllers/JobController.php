@@ -26,10 +26,10 @@ class JobController extends Controller
         Carbon::setLocale('ru');
 
         $jobs->each(function ($job) {
-//            $job->created_at_for_humans = Carbon::parse($job->created_at)->diffForHumans();
+            $job->created_at_for_humans = Carbon::parse($job->created_at)->diffForHumans();
             $job->date_deadline = Carbon::createFromFormat('Y-m-d', $job->date_deadline)->format('d.m.Y');
-//            $job->auth_id = Auth::id();
-//            $job->count = $job->User->job_count;
+            $job->auth_id = Auth::id();
+            $job->count = $job->User->job_count;
             $job->detail_info = $job->User->detailInfo;
         });
 
@@ -122,10 +122,10 @@ class JobController extends Controller
 
         Carbon::setLocale('ru');
 
-//        $job->created_at_for_humans = Carbon::parse($job->created_at)->diffForHumans();
+        $job->created_at_for_humans = Carbon::parse($job->created_at)->diffForHumans();
         $job->date_deadline = Carbon::createFromFormat('Y-m-d', $job->date_deadline)->format('d.m.Y');
-//        $job->auth_id = Auth::id();
-        $job->detail_info = $job->User->detailInfo();
+        $job->auth_id = Auth::id();
+        $job->detail_info = $job->User->detailInfo;
 
         return Inertia::render('Jobs/Detail', [
             'job' => $job,
@@ -143,7 +143,7 @@ class JobController extends Controller
         Carbon::setLocale('ru');
 
         $jobs->each(function ($job) {
-//            $job->created_at_for_humans = Carbon::parse($job->created_at)->diffForHumans();
+            $job->created_at_for_humans = Carbon::parse($job->created_at)->diffForHumans();
             $job->date_deadline = Carbon::createFromFormat('Y-m-d', $job->date_deadline)->format('d.m.Y');
         });
 
@@ -161,7 +161,7 @@ class JobController extends Controller
         $categories = JobCategory::all();
 
         Carbon::setLocale('ru');
-//        $job2->date = Carbon::parse($job2->date)->format('Y-m-d\TH:i:s');
+        $job2->date = Carbon::parse($job2->date)->format('Y-m-d\TH:i:s');
 
         return Inertia::render('Jobs/Edit', [
             'job' => $job2,

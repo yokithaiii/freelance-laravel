@@ -68,21 +68,21 @@ class ProfileController extends Controller
             $image = $request->file('avatar');
 
             if ($image->isValid()) {
-                if ($user->userInfo->avatar) {
-                    Storage::disk('public')->delete($user->userInfo->avatar);
+                if ($user->detailInfo->avatar) {
+                    Storage::disk('public')->delete($user->detailInfo->avatar);
                 }
 
                 $path = $image->store('uploads', 'public');
-                $user->userInfo->avatar = $path;
-                $user->userInfo->save();
+                $user->detailInfo->avatar = $path;
+                $user->detailInfo->save();
                 unset($validatedData['avatar']);
             }
         }
 
-        if ($user->userInfo) {
-            $user->userInfo->update($validatedData);
+        if ($user->detailInfo) {
+            $user->detailInfo->update($validatedData);
         } else {
-            $user->userInfo()->create($validatedData);
+            $user->detailInfo->create($validatedData);
         }
 
         return Redirect::route('profile.show')->with('success', 'Profile updated successfully.');
