@@ -35,7 +35,6 @@ const props = defineProps({
                             :user="job.user"
                             :auth_id="job.auth_id"
                             :files="job.images"
-                            :count="job.count"
                         >
                         </Card>
                     </div>

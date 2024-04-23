@@ -80,7 +80,7 @@ const shortenText = (text) => {
                         </span>
                     </span>
                     <span class="font-medium dark:text-white">
-                        Размещено заказов: {{ count }}
+                        Размещено заказов: {{ user.detail_info.jobs_count }}
                     </span>
                 </div>
             </div>

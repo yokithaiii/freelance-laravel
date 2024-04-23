@@ -19,7 +19,7 @@ const form = useForm({
     category_id: props.job.category_id ? props.job.category_id : '',
     sub_category_id: props.job.sub_category_id ? props.job.sub_category_id : '',
     price: props.job.price ? props.job.price : '',
-    price_in_hour: props.job.price_in_hour ? props.job.price_in_hour : false,
+    price_in_hour_flag: props.job.price_in_hour_flag ? props.job.price_in_hour_flag : false,
     files: props.job.images ? props.job.images : null,
     date: props.job.date ? props.job.date : null,
     delete_files: [],
@@ -27,8 +27,8 @@ const form = useForm({
 
 const tempFiles = ref(props.job.images ? props.job.images : null);
 const tempPrice = ref(props.job.price ? props.job.price : '');
-const tempPriceInHour= ref(props.job.price_in_hour ? props.job.price_in_hour : '');
-const isChecked = ref(props.job ? props.job.price_in_hour : false);
+const tempPriceInHour= ref(props.job.price_in_hour_flag ? props.job.price_in_hour_flag : '');
+const isChecked = ref(props.job ? props.job.price_in_hour_flag : false);
 const datepickerInput = ref(null);
 
 const fileHandler = (event) => {
@@ -56,7 +56,7 @@ const deleteFiles = (index) => {
 const updatePrice = () => {
     if (isChecked.value) {
         form.price = tempPriceInHour.value;
-        form.price_in_hour = true;
+        form.price_in_hour_flag = true;
     } else {
         form.price = tempPrice.value;
     }
@@ -114,7 +114,7 @@ const resetForm = () => {
     form.category_id = '';
     form.sub_category_id = '';
     form.price = '';
-    form.price_in_hour = false;
+    form.price_in_hour_flag = false;
     form.files = null;
     form.date = null;
     tempFiles.value = null;
@@ -129,7 +129,7 @@ watch(isChecked, (newValue) => {
         updatePrice();
     } else {
         form.price = tempPrice.value;
-        form.price_in_hour = false;
+        form.price_in_hour_flag = false;
     }
 });
 

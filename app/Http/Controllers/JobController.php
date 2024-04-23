@@ -29,7 +29,7 @@ class JobController extends Controller
                 $file_path = $file->store('uploads', 'public');
                 $jobImage = new JobImage([
                     'file_name' => $file_name,
-                    'file_url' => $file_path,
+                    'file_path' => $file_path,
                     'job_id' => $job->id,
                 ]);
                 $jobImage->save();
@@ -43,7 +43,7 @@ class JobController extends Controller
             $imageIdsToDelete = $request->input('delete_files');
             $imagesToDelete = JobImage::whereIn('id', $imageIdsToDelete)->get();
             foreach ($imagesToDelete as $image) {
-                Storage::disk('public')->delete($image->url);
+                Storage::disk('public')->delete($image->file_path);
                 $image->delete();
             }
         }
@@ -198,14 +198,14 @@ class JobController extends Controller
         }
 
         // Проверка, является ли цена диапазоном
-        $price_in_hour = false;
+        $price_in_hour_flag = false;
         if (isset($validatedData['price']) && strpos($validatedData['price'], '-') !== false) {
-            $price_in_hour = true;
+            $price_in_hour_flag = true;
         }
 
         // Обновляем запись
         $job->update(array_merge($validatedData, [
-            'price_in_hour' => $price_in_hour,
+            'price_in_hour_flag' => $price_in_hour_flag,
             'category_id' => $category ? $category->id : null,
         ]));
 
@@ -233,7 +233,7 @@ class JobController extends Controller
 
         $jobImages = JobImage::where('job_id', $id)->get();
         foreach ($jobImages as $image) {
-            Storage::disk('public')->delete($image->url);
+            Storage::disk('public')->delete($image->file_path);
             $image->delete();
         }
 
