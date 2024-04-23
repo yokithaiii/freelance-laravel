@@ -2,22 +2,57 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\JobStoreRequest;
+use App\Http\Requests\JobUpdateRequest;
 use App\Models\Job;
 use App\Models\JobCategory;
 use App\Models\JobImage;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class JobController extends Controller
 {
+
+    protected function saveFiles(Request $request, Job $job): void
+    {
+        if ($request->hasFile('files')) {
+            $files = $request->file('files');
+            foreach ($files as $file) {
+                $file_name = $file->getClientOriginalName();
+                $file_path = $file->store('uploads', 'public');
+                $jobImage = new JobImage([
+                    'file_name' => $file_name,
+                    'file_url' => $file_path,
+                    'job_id' => $job->id,
+                ]);
+                $jobImage->save();
+            }
+        }
+    }
+
+    protected function deleteFiles(Request $request): void
+    {
+        if ($request->has('delete_files')) {
+            $imageIdsToDelete = $request->input('delete_files');
+            $imagesToDelete = JobImage::whereIn('id', $imageIdsToDelete)->get();
+            foreach ($imagesToDelete as $image) {
+                Storage::disk('public')->delete($image->url);
+                $image->delete();
+            }
+        }
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): Response
     {
         $jobs = Job::with('user', 'category', 'images')
             ->orderBy('created_at', 'desc')
@@ -41,7 +76,7 @@ class JobController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): Response
     {
         $categories = JobCategory::all();
         return Inertia::render('Jobs/Create', [
@@ -52,16 +87,9 @@ class JobController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(JobStoreRequest $request): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|string',
-            'date_deadline' => 'required',
-            'files' => 'nullable',
-            'category_id' => 'nullable|exists:categories,id',
-        ]);
+        $validatedData = $request->validated();
 
         // Получение категории, если она указана
         $category = null;
@@ -76,15 +104,11 @@ class JobController extends Controller
         }
 
         // Создание нового заказа
-        $job = Job::create([
-            'title' => $validatedData['title'],
-            'description' => $validatedData['description'],
-            'price' => $validatedData['price'],
+        $job = Job::create(array_merge($validatedData, [
             'price_in_hour_flag' => $price_in_hour_flag,
-            'date_deadline' => $validatedData['date_deadline'],
             'user_id' => Auth::id(),
             'category_id' => $category ? $category->id : null,
-        ]);
+        ]));
 
         // Увеличиваем job_count для пользователя
         $user = Auth::user();
@@ -93,22 +117,7 @@ class JobController extends Controller
         }
 
         // Сохраняем файлы
-        if ($request->hasFile('files')) {
-            $files = $request->file('files');
-
-            foreach ($files as $file) {
-                $file_path = $file->store('uploads', 'public');
-                $file_name = $file->getClientOriginalName();
-
-                $jobImage = new JobImage([
-                    'file_name' => $file_name,
-                    'file_path' => $file_path,
-                    'job_id' => $job->id,
-                ]);
-
-                $jobImage->save();
-            }
-        }
+        $this->saveFiles($request, $job);
 
         return Redirect::route('jobs.index')->with('success', 'Новый заказ успешно добавлен!');
     }
@@ -116,7 +125,7 @@ class JobController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id): Response
     {
         $job = Job::with('user', 'category', 'images')->find($id);
 
@@ -132,7 +141,7 @@ class JobController extends Controller
         ]);
     }
 
-    public function manage()
+    public function manage(): Response
     {
         $jobs = Job::query()
             ->where('user_id', Auth::id())
@@ -155,7 +164,7 @@ class JobController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(string $id): Response
     {
         $job2 = Job::with('user', 'category', 'images')->find($id);
         $categories = JobCategory::all();
@@ -172,25 +181,15 @@ class JobController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(JobUpdateRequest $request, string $id): JsonResponse|RedirectResponse
     {
         // Проверяем, существует ли запись с указанным id
         $job = Job::find($id);
-
         if (!$job) {
-            // Если запись не найдена, возвращаем ошибку или редирект
             return response()->json(['message' => 'Job not found'], 404);
         }
 
-        // Валидация данных
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|string',
-            'date_deadline' => 'required',
-            'files' => 'nullable',
-            'category_id' => 'nullable|exists:categories,id',
-        ]);
+        $validatedData = $request->validated();
 
         // Получение категории, если она указана
         $category = null;
@@ -205,48 +204,16 @@ class JobController extends Controller
         }
 
         // Обновляем запись
-        $job->update([
-            'title' => $validatedData['title'],
-            'description' => $validatedData['description'],
-            'price' => $validatedData['price'],
+        $job->update(array_merge($validatedData, [
             'price_in_hour' => $price_in_hour,
-            'date_deadline' => $validatedData['date_deadline'],
             'category_id' => $category ? $category->id : null,
-        ]);
+        ]));
 
         // Сохраняем файлы
-        if ($request->hasFile('files')) {
-            $files = $request->file('files');
-
-            foreach ($files as $file) {
-                $file_name = $file->getClientOriginalName();
-                $file_path = $file->store('uploads', 'public');
-
-                $jobImage = new JobImage([
-                    'file_name' => $file_name,
-                    'file_url' => $file_path,
-                    'job_id' => $job->id,
-                ]);
-
-                $jobImage->save();
-            }
-        }
+        $this->saveFiles($request, $job);
 
         // Удаление фотографий
-        if ($request->has('delete_files')) {
-            $imageIdsToDelete = $request->input('delete_files');
-
-            // Удаляем файлы из хранилища и записи из базы данных
-            $imagesToDelete = JobImage::whereIn('id', $imageIdsToDelete)->get();
-
-            foreach ($imagesToDelete as $image) {
-                // Удаляем файл из хранилища
-                Storage::disk('public')->delete($image->url);
-
-                // Удаляем запись из базы данных
-                $image->delete();
-            }
-        }
+        $this->deleteFiles($request);
 
         // Возвращаем ответ
         return Redirect::route('jobs.manage')->with('success', 'Заказ успешно обновлен!');
@@ -255,7 +222,7 @@ class JobController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(String $id)
+    public function destroy(String $id): JsonResponse|RedirectResponse
     {
 
         $job = Job::find($id);
