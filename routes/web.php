@@ -61,7 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/offer/job={id}', [OfferController::class, 'create'])->name('offer.create');
     Route::post('/offer/store', [OfferController::class, 'store'])->name('offer.store');
     Route::post('/offer/accept', [OfferController::class, 'offerAccept'])->name('offer.offerAccept');
-    Route::post('/offer/accept', [OfferController::class, 'offerDecline'])->name('offer.offerDecline');
+    Route::post('/offer/decline', [OfferController::class, 'offerDecline'])->name('offer.offerDecline');
 });
 
 require __DIR__.'/auth.php';
