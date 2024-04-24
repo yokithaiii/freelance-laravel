@@ -3,6 +3,7 @@
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\OfferController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -52,6 +53,15 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/user/{login}', [UserController::class, 'show'])->name('user.show');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/offers', [OfferController::class, 'index'])->name('offer.index');
+    Route::get('/offers/notifications', [OfferController::class, 'offerNotifications'])->name('offer.offerNotifications');
+    Route::get('/offer/job={id}', [OfferController::class, 'create'])->name('offer.create');
+    Route::post('/offer/store', [OfferController::class, 'store'])->name('offer.store');
+    Route::post('/offer/accept', [OfferController::class, 'offerAccept'])->name('offer.offerAccept');
+    Route::post('/offer/accept', [OfferController::class, 'offerDecline'])->name('offer.offerDecline');
 });
 
 require __DIR__.'/auth.php';
