@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
+import { Head, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import {Head, Link, useForm, usePage} from '@inertiajs/vue3';
 import TextInput from "@/Components/TextInput.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import InputError from "@/Components/InputError.vue";
@@ -20,14 +20,14 @@ const form = useForm({
     sub_category_id: props.job.sub_category_id ? props.job.sub_category_id : '',
     price: props.job.price ? props.job.price : '',
     price_in_hour_flag: props.job.price_in_hour_flag ? props.job.price_in_hour_flag : false,
-    files: props.job.images ? props.job.images : null,
-    date: props.job.date ? props.job.date : null,
+    files: props.job.images ? props.job.images : [],
+    date: props.job.date ? props.job.date : '',
     delete_files: [],
 });
 
-const tempFiles = ref(props.job.images ? props.job.images : null);
+const tempFiles = ref(props.job.images ? props.job.images : []);
 const tempPrice = ref(props.job.price ? props.job.price : '');
-const tempPriceInHour= ref(props.job.price_in_hour_flag ? props.job.price_in_hour_flag : '');
+const tempPriceInHour= ref(props.job.price_in_hour_flag ? props.job.price_in_hour_flag : false);
 const isChecked = ref(props.job ? props.job.price_in_hour_flag : false);
 const datepickerInput = ref(null);
 
@@ -50,10 +50,9 @@ const deleteFiles = (index) => {
             form.delete_files.push(fileId);
         }
     }
-    console.log(form.delete_files);
 }
 
-const updatePrice = () => {
+const priceHandler = () => {
     if (isChecked.value) {
         form.price = tempPriceInHour.value;
         form.price_in_hour_flag = true;
@@ -61,14 +60,6 @@ const updatePrice = () => {
         form.price = tempPrice.value;
     }
 }
-
-const selectedCategory = computed(() => {
-    return props.categories.find(category => category.id === parseInt(form.category_id));
-});
-
-const subCategories = computed(() => {
-    return selectedCategory.value ? selectedCategory.value.sub_categories : [];
-});
 
 const initDatepicker = () => {
     if (datepickerInput.value) {
@@ -83,50 +74,36 @@ const initDatepicker = () => {
         }
 
         datepickerInput.value.addEventListener('changeDate', (event) => {
-            // Получаем дату из события
             const date = new Date(event.detail.date);
 
-            // Форматируем дату в формат 'Y-m-d' без учета часового пояса
             const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0, поэтому +1
+            const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
-            const formattedDate = `${year}-${month}-${day}`;
 
-            // Отправляем дату на сервер или используем в вашем приложении
-            form.date = formattedDate;
-            console.log(form.date);
+            form.date = `${year}-${month}-${day}`;
         });
 
     }
 };
 
 const submit = () => {
-    form.post(route('jobs.update', { id: props.job.id }), {
-        onFinish: () => {
-            resetForm();
-        },
-    });
+    form.post(route('jobs.update', { id: props.job.id }));
 };
 
-const resetForm = () => {
-    form.title = '';
-    form.description = '';
-    form.category_id = '';
-    form.sub_category_id = '';
-    form.price = '';
-    form.price_in_hour_flag = false;
-    form.files = null;
-    form.date = null;
-    tempFiles.value = null;
-    tempPrice.value = '';
-    tempPriceInHour.value = '';
-    isChecked.value = false;
-};
+const selectedCategory = computed(() => {
+    return props.categories.find(category => category.id === parseInt(form.category_id));
+});
 
-// Отслеживаем изменения в чекбоксе
+const subCategories = computed(() => {
+    if (selectedCategory.value) {
+        return selectedCategory.value.children;
+    }
+    return [];
+});
+
 watch(isChecked, (newValue) => {
     if (newValue) {
-        updatePrice();
+        priceHandler();
     } else {
         form.price = tempPrice.value;
         form.price_in_hour_flag = false;
@@ -198,7 +175,7 @@ onMounted(initDatepicker);
 
                                 <div class="grid grid-cols-2 gap-3">
                                     <div class="mt-2 w-full">
-                                        <select v-model="form.category_id" id="category" name="category" class="block w-full rounded-md border-0 mt-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                            <select v-model="form.category_id" id="category" name="category" class="block w-full rounded-md border-0 mt-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                                             <option v-for="category in categories" :key="category.id" :value="category.id">
                                                 {{ category.name }}
                                             </option>
@@ -223,7 +200,7 @@ onMounted(initDatepicker);
                                             id="price"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            @input="updatePrice"
+                                            @input="priceHandler"
                                             v-model="tempPrice"
                                             required
                                             :disabled="isChecked"
@@ -240,7 +217,7 @@ onMounted(initDatepicker);
 
                                         <div class="mt-2 w-full" v-if="isChecked">
                                             <p class="mt-3 text-sm leading-6 text-gray-600">Чтобы фрилансеры могли присылать более релевантные отклики, укажите пожалуйста ориентировочную сумму, которую вы готовы платить за час работы:</p>
-                                            <select v-model="tempPriceInHour" @change="updatePrice" id="category" name="category" autocomplete="country-name" class="block w-full rounded-md border-0 mt-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6">
+                                            <select v-model="tempPriceInHour" @change="priceHandler" id="category" name="category" autocomplete="country-name" class="block w-full rounded-md border-0 mt-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6">
                                                 <option value="100">До 100 ₽</option>
                                                 <option value="100-200">101 - 200 ₽</option>
                                                 <option value="200-500">201 - 500 ₽</option>

@@ -7,6 +7,7 @@ use App\Http\Requests\JobUpdateRequest;
 use App\Models\Job;
 use App\Models\JobCategory;
 use App\Models\JobImage;
+use App\Models\JobSelectedCategory;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -49,27 +50,49 @@ class JobController extends Controller
         }
     }
 
+    protected function buildCategoryTree($categories, $parentId = null): array
+    {
+        $branch = [];
+
+        foreach ($categories as $category) {
+            if ($category->parent_id == $parentId) {
+                $children = $this->buildCategoryTree($categories, $category->id);
+                if ($children) {
+                    $category->children = $children;
+                }
+                $branch[] = $category;
+            }
+        }
+
+        return $branch;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(): Response
     {
-        $jobs = Job::with('user', 'category', 'images')
+        $jobs = Job::with('user', 'images')
             ->orderBy('created_at', 'desc')
             ->get();
 
         Carbon::setLocale('ru');
 
         $jobs->each(function ($job) {
+            $categories = $job->selectedCategory()->get();
+            $selectedCategories = [];
+            foreach ($categories as $categoryId) {
+                $selectedCategories[] = JobCategory::find($categoryId->category_id);
+            }
             $job->created_at_for_humans = Carbon::parse($job->created_at)->diffForHumans();
             $job->date_deadline = Carbon::createFromFormat('Y-m-d', $job->date_deadline)->format('d.m.Y');
             $job->auth_id = Auth::id();
-            $job->count = $job->User->job_count;
-            $job->detail_info = $job->User->detailInfo;
+            $job->user->detail_info = $job->User->detailInfo;
+            $job->selected_categories = $selectedCategories;
         });
 
         return Inertia::render('Jobs/Index', [
-            'jobs' => $jobs
+            'jobs' => $jobs,
         ]);
     }
 
@@ -79,8 +102,9 @@ class JobController extends Controller
     public function create(): Response
     {
         $categories = JobCategory::all();
+        $categoryTree = $this->buildCategoryTree($categories);
         return Inertia::render('Jobs/Create', [
-            'categories' => $categories
+            'categories' => $categoryTree
         ]);
     }
 
@@ -90,12 +114,6 @@ class JobController extends Controller
     public function store(JobStoreRequest $request): RedirectResponse
     {
         $validatedData = $request->validated();
-
-        // Получение категории, если она указана
-        $category = null;
-        if ($request->has('category_id')) {
-            $category = JobCategory::find($request->category_id);
-        }
 
         // Проверка, является ли цена диапазоном
         $price_in_hour_flag = false;
@@ -107,8 +125,26 @@ class JobController extends Controller
         $job = Job::create(array_merge($validatedData, [
             'price_in_hour_flag' => $price_in_hour_flag,
             'user_id' => Auth::id(),
-            'category_id' => $category ? $category->id : null,
+            // 'category_id' => $category ? $category->id : null,
         ]));
+
+        // Получение категории, если она указана
+        if ($request->has('category_id')) {
+            JobSelectedCategory::where('job_id', $job->id)
+                ->delete();
+
+            $jobSelectedCategory = JobSelectedCategory::updateOrCreate([
+                'job_id' => $job->id,
+                'category_id' => $request->category_id,
+            ]);
+        }
+
+        if ($request->has('sub_category_id')) {
+            $jobSelectedCategory = JobSelectedCategory::updateOrCreate([
+                'job_id' => $job->id,
+                'category_id' => $request->sub_category_id,
+            ]);
+        }
 
         // Увеличиваем job_count для пользователя
         $user = Auth::user();
@@ -127,14 +163,21 @@ class JobController extends Controller
      */
     public function show(string $id): Response
     {
-        $job = Job::with('user', 'category', 'images')->find($id);
+        $job = Job::with('user', 'images')->find($id);
 
         Carbon::setLocale('ru');
+
+        $categories = $job->selectedCategory()->get();
+        $selectedCategories = [];
+        foreach ($categories as $categoryId) {
+            $selectedCategories[] = JobCategory::find($categoryId->category_id);
+        }
 
         $job->created_at_for_humans = Carbon::parse($job->created_at)->diffForHumans();
         $job->date_deadline = Carbon::createFromFormat('Y-m-d', $job->date_deadline)->format('d.m.Y');
         $job->auth_id = Auth::id();
         $job->detail_info = $job->User->detailInfo;
+        $job->selected_categories = $selectedCategories;
 
         return Inertia::render('Jobs/Detail', [
             'job' => $job,
@@ -145,15 +188,22 @@ class JobController extends Controller
     {
         $jobs = Job::query()
             ->where('user_id', Auth::id())
-            ->with('category', 'images')
+            ->with('images')
             ->orderBy('created_at', 'desc')
             ->get();
 
         Carbon::setLocale('ru');
 
         $jobs->each(function ($job) {
+            $categories = $job->selectedCategory()->get();
+            $selectedCategories = [];
+            foreach ($categories as $categoryId) {
+                $selectedCategories[] = JobCategory::find($categoryId->category_id);
+            }
+
             $job->created_at_for_humans = Carbon::parse($job->created_at)->diffForHumans();
             $job->date_deadline = Carbon::createFromFormat('Y-m-d', $job->date_deadline)->format('d.m.Y');
+            $job->selected_categories = $selectedCategories;
         });
 
         return Inertia::render('Jobs/Manage', [
@@ -166,15 +216,24 @@ class JobController extends Controller
      */
     public function edit(string $id): Response
     {
-        $job2 = Job::with('user', 'category', 'images')->find($id);
+        $job2 = Job::with('user', 'images')->find($id);
         $categories = JobCategory::all();
 
+        $categories2 = $job2->selectedCategory()->get();
+        $selectedCategories = [];
+        foreach ($categories2 as $categoryId) {
+            $selectedCategories[] = JobCategory::find($categoryId->category_id);
+        }
         Carbon::setLocale('ru');
         $job2->date = Carbon::parse($job2->date)->format('Y-m-d\TH:i:s');
+        $job2->category_id = array_key_exists(0, $selectedCategories) ? $selectedCategories[0]['id'] : null;
+        $job2->sub_category_id = array_key_exists(1, $selectedCategories) ? $selectedCategories[1]['id'] : null;
+
+        $categoryTree = $this->buildCategoryTree($categories);
 
         return Inertia::render('Jobs/Edit', [
             'job' => $job2,
-            'categories' => $categories,
+            'categories' => $categoryTree,
         ]);
     }
 
@@ -192,9 +251,21 @@ class JobController extends Controller
         $validatedData = $request->validated();
 
         // Получение категории, если она указана
-        $category = null;
         if ($request->has('category_id')) {
-            $category = JobCategory::find($request->category_id);
+            JobSelectedCategory::where('job_id', $job->id)
+                ->delete();
+
+            $jobSelectedCategory = JobSelectedCategory::updateOrCreate([
+                'job_id' => $job->id,
+                'category_id' => $request->category_id,
+            ]);
+        }
+
+        if ($request->has('sub_category_id')) {
+            $jobSelectedCategory = JobSelectedCategory::updateOrCreate([
+                'job_id' => $job->id,
+                'category_id' => $request->sub_category_id,
+            ]);
         }
 
         // Проверка, является ли цена диапазоном
@@ -206,7 +277,7 @@ class JobController extends Controller
         // Обновляем запись
         $job->update(array_merge($validatedData, [
             'price_in_hour_flag' => $price_in_hour_flag,
-            'category_id' => $category ? $category->id : null,
+            'categories' => $job->selectedCategory
         ]));
 
         // Сохраняем файлы

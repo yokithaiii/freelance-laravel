@@ -27,7 +27,7 @@ class JobStoreRequest extends FormRequest
             'price' => 'required|string',
             'date_deadline' => 'required',
             'files' => 'nullable',
-            'category_id' => 'nullable|exists:categories,id',
+            'category_id' => 'nullable|exists:jobs_categories,id',
         ];
     }
 }

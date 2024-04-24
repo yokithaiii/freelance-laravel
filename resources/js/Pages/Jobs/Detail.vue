@@ -29,19 +29,7 @@ const props = defineProps({
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 flex flex-col gap-4">
                         <CardDetail
-                            :key="job.id"
-                            :id="job.id"
-                            :title="job.title"
-                            :description="job.description"
-                            :category="job.category ? job.category.name : 'Категория не указана'"
-                            :sub_category="job.sub_category ? job.sub_category.name : null"
-                            :price="job.price"
-                            :price_in_hour_flag="job.price_in_hour_flag"
-                            :date_published="job.created_at_for_humans"
-                            :date_deadline="job.date_deadline"
-                            :user="job.user"
-                            :auth_id="job.auth_id"
-                            :files="job.images"
+                            :job="job"
                         >
                         </CardDetail>
                     </div>

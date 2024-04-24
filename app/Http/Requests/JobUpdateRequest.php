@@ -27,7 +27,7 @@ class JobUpdateRequest extends FormRequest
             'price' => 'string',
             'date_deadline' => 'string',
             'files' => 'nullable',
-            'category_id' => 'nullable|exists:categories,id',
+            'category_id' => 'nullable|exists:jobs_categories,id',
         ];
     }
 }

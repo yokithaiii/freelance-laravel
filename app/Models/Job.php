@@ -29,6 +29,11 @@ class Job extends Model
         return $this->belongsTo(JobCategory::class);
     }
 
+    public function selectedCategory()
+    {
+        return $this->hasMany(JobSelectedCategory::class);
+    }
+
     public function images()
     {
         return $this->hasMany(JobImage::class);
