@@ -25,7 +25,7 @@ const props = defineProps({
                         Назад
                     </a>
                 </div>
-                <div v-if="!user.detail_info" class="container mx-auto py-8">
+                <div v-if="!user.detail_info.name" class="container mx-auto py-8">
                     <div class="w-full">
                         <div class="bg-white shadow rounded-lg p-6">
                             <p>No profile information available.</p>
