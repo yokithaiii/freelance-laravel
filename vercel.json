@@ -4,9 +4,6 @@
   "functions": {
     "api/index.php": { "runtime": "vercel-php@0.6.0" }
   },
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ],
   "routes": [{
     "src": "/(.*)",
     "dest": "/api/index.php"
