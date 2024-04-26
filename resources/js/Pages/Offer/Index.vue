@@ -1,10 +1,20 @@
 <script setup>
+import { ref, onMounted } from "vue";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
 const props = defineProps({
     offers: Array,
-})
+});
+
+const formatDate = (inputDate) => {
+    const date = new Date(inputDate);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return day + '.' + month + '.' + year;
+};
+
 </script>
 
 <template>
@@ -29,9 +39,9 @@ const props = defineProps({
 
                 <div v-else class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="text-gray-900 flex flex-col gap-4">
-                        <!-- <pre>
+                        <pre>
                             {{ offers }}
-                        </pre> -->
+                        </pre>
 
                         <ul role="list" class="max-w divide-y divide-gray-200 dark:divide-gray-700">
                             <li v-for="offer in offers" :key="offer.id" class="py-4 px-4 hover:bg-gray-100">
@@ -44,6 +54,9 @@ const props = defineProps({
                                             </div>
                                         </div>
                                         <div class="flex-1 min-w-0">
+                                            <p class="text-sm text-gray-500 truncate dark:text-gray-400">
+                                                Дата: {{ formatDate(offer.created_at) }}
+                                            </p>
                                             <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
                                                 Название заказа: {{  offer.job.title }}
                                             </p>

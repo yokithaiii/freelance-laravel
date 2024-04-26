@@ -21,7 +21,7 @@ const form = useForm({
     price: props.job.price ? props.job.price : '',
     price_in_hour_flag: props.job.price_in_hour_flag ? props.job.price_in_hour_flag : false,
     files: props.job.images ? props.job.images : [],
-    date: props.job.date ? props.job.date : '',
+    date_deadline: props.job.date_deadline ? props.job.date_deadline : '',
     delete_files: [],
 });
 
@@ -65,12 +65,12 @@ const initDatepicker = () => {
     if (datepickerInput.value) {
         const datepicker = new Datepicker(datepickerInput.value, {
             weekStart: 1,
-            format: 'yyyy-mm-dd',
+            format: 'dd.mm.yyyy',
             todayHighlight: true,
         });
 
-        if (props.job.date) {
-            datepicker.setDate(props.job.date);
+        if (props.job.date_deadline) {
+            datepicker.setDate(props.job.date_deadline);
         }
 
         datepickerInput.value.addEventListener('changeDate', (event) => {
@@ -80,7 +80,8 @@ const initDatepicker = () => {
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
 
-            form.date = `${year}-${month}-${day}`;
+            form.date_deadline = `${year}-${month}-${day}`;
+            console.log(form.date_deadline);
         });
 
     }
