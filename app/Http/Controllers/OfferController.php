@@ -57,7 +57,6 @@ class OfferController extends Controller
     {
         $validatedData = $request->validated();
 
-        // Создание нового предложения
         $offer = JobOffer::create(array_merge($validatedData, [
             'offer_status' => 'Ожидается',
             'executor_id' => Auth::id(),
@@ -79,12 +78,12 @@ class OfferController extends Controller
             ->with('job', 'user', 'user.detailInfo')
             ->get();
 
-        return Inertia::render('Offer/offerNotifications', [
+        return Inertia::render('Offer/OfferNotifications', [
             'offers' => $offers,
         ]);
     }
 
-    public function offerAccept(Request $request)
+    public function offerAccept(Request $request): JsonResponse
     {
         $offer = JobOffer::find($request->offer_id);
         if (!$offer) {
@@ -98,7 +97,7 @@ class OfferController extends Controller
         return response()->json(['message' => 'Offer accepted succesfully.'], 200);
     }
 
-    public function offerDecline(Request $request)
+    public function offerDecline(Request $request): JsonResponse
     {
         $offer = JobOffer::find($request->offer_id);
         if (!$offer) {
