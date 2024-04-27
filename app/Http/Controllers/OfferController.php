@@ -73,8 +73,8 @@ class OfferController extends Controller
     public function offerNotifications(): Response
     {
         $offers = JobOffer::where('customer_id', Auth::id())
-            ->where('offer_status', '!=', 'Принят')
-            ->where('offer_status', '!=', 'Отклонено')
+//            ->where('offer_status', '!=', 'Принят')
+//            ->where('offer_status', '!=', 'Отклонено')
             ->with('job', 'user', 'user.detailInfo')
             ->get();
 

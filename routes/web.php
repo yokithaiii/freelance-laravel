@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
@@ -62,6 +63,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/offer/store', [OfferController::class, 'store'])->name('offer.store');
     Route::post('/offer/accept', [OfferController::class, 'offerAccept'])->name('offer.offerAccept');
     Route::post('/offer/decline', [OfferController::class, 'offerDecline'])->name('offer.offerDecline');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/chat/{login}', [ChatController::class, 'create'])->name('chat.create');
+    Route::post('/chat/', [ChatController::class, 'store'])->name('chat.store');
 });
 
 require __DIR__.'/auth.php';

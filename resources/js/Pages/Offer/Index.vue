@@ -39,9 +39,9 @@ const formatDate = (inputDate) => {
 
                 <div v-else class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="text-gray-900 flex flex-col gap-4">
-                        <pre>
-                            {{ offers }}
-                        </pre>
+<!--                        <pre>-->
+<!--                            {{ offers }}-->
+<!--                        </pre>-->
 
                         <ul role="list" class="max-w divide-y divide-gray-200 dark:divide-gray-700">
                             <li v-for="offer in offers" :key="offer.id" class="py-4 px-4 hover:bg-gray-100">

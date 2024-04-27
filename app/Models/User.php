@@ -46,4 +46,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserDetailInfo::class);
     }
+
+    public function notifications()
+    {
+        return $this->hasMany(JobOffer::class, 'customer_id');
+    }
 }
