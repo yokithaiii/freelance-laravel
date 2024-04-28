@@ -8,10 +8,12 @@ const props = defineProps({
 
 const form = useForm({
     offer_id: '',
+    offer_from_id: null,
 });
 
-const submitAccept = (offerId) => {
+const submitAccept = (offerId, offerUserId) => {
     form.offer_id = offerId;
+    form.offer_from_id = offerUserId;
     form.post(route('offer.offerAccept'));
 };
 
@@ -43,9 +45,6 @@ const submitDecline = (offerId) => {
 
                 <div v-else class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="text-gray-900 flex flex-col gap-4">
-                        <!-- <pre>
-                            {{ offers }}
-                        </pre> -->
 
                         <ul role="list" class="max-w divide-y divide-gray-200 dark:divide-gray-700">
                             <li v-for="offer in offers" :key="offer.id" class="py-4 px-4">
@@ -64,13 +63,18 @@ const submitDecline = (offerId) => {
                                             Исполнитель: {{ offer.user.detail_info.name ? offer.user.detail_info.name : offer.user.login }}
                                         </p>
                                     </div>
-                                    <div class="flex items-center space-x-3 rtl:space-x-reverse inline-flex items-center text-base font-semibold text-gray-900 text-white">
+                                    <div v-if="offer.offer_status != 'Принят' && offer.offer_status != 'Отклонено'" class="flex items-center space-x-3 rtl:space-x-reverse inline-flex items-center text-base font-semibold text-gray-900 text-white">
                                         <button @click.prevent="submitDecline(offer.id)" class="inline-flex items-center px-4 py-2 bg-red-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 ms-4">
                                             Отклонить
                                         </button>
-                                        <button @click.prevent="submitAccept(offer.id)" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 ms-4">
+                                        <button @click.prevent="submitAccept(offer.id, offer.user.id)" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 ms-4">
                                             Принять
                                         </button>
+                                    </div>
+                                    <div v-else class="flex items-center space-x-3 rtl:space-x-reverse inline-flex items-center text-base font-semibold text-gray-900 text-white">
+                                        <p class="text-black">
+                                            Вы уже приняли
+                                        </p>
                                     </div>
                                 </div>
                             </li>

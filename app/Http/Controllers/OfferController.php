@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\OfferStoreRequest;
+use App\Models\Chat;
+use App\Models\ChatPivot;
 use App\Models\Job;
 use App\Models\JobOffer;
 use App\Models\JobCategory;
@@ -92,6 +94,20 @@ class OfferController extends Controller
 
         $offer->update([
             'offer_status' => 'Принят',
+        ]);
+
+        $chat = Chat::create();
+
+        $pivot = ChatPivot::updateOrCreate([
+            'chat_id' => $chat->id,
+            'sender_id' => $request->offer_from_id,
+            'receiver_id' => Auth::id(),
+        ]);
+        //duplicate to other side
+        $pivot = ChatPivot::updateOrCreate([
+            'chat_id' => $chat->id,
+            'sender_id' => Auth::id(),
+            'receiver_id' => $request->offer_from_id,
         ]);
 
         return response()->json(['message' => 'Offer accepted succesfully.'], 200);
