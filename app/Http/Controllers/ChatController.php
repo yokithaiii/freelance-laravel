@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\StoreMessageEvent;
+use App\Http\Requests\MessageStoreRequest;
+use App\Http\Resources\MessageResource;
 use App\Models\Chat;
+use App\Models\ChatMessage;
 use App\Models\ChatPivot;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -13,12 +17,16 @@ use Inertia\Response;
 
 class ChatController extends Controller
 {
-
-    public function index()
+    public function index(): Response
     {
-        $chats = ChatPivot::with('receiver', 'receiver.detailInfo', 'chat')
+        $chats = ChatPivot::with('receiver', 'receiver.detailInfo', 'chat', 'chat.messages')
             ->where('sender_id', Auth::id())
             ->get();
+
+        $chats->each(function ($chat) {
+            $lastMessage = $chat->chat->messages->last();
+            $chat->last_message = $lastMessage;
+        });
 
         return Inertia::render('Chat/Index', [
             'chats' => $chats,
@@ -38,19 +46,11 @@ class ChatController extends Controller
 
         $formattedMessages = [];
         foreach ($chat->chat->messages as $message) {
-            $formattedMessages[] = [
-                'id' => $message->id,
-                'body' => $message->body,
-                'user' => [
-                    'id' => $message->user['id'],
-                    'name' => $message->user->detailInfo['name'],
-                    'avatar' => $message->user->detailInfo['avatar'],
-                ],
-            ];
+            $formattedMessages[] = new MessageResource($message);
         }
 
         $response = [
-            'id' => $chat->id,
+            'id' => $chat->chat_id,
             'chat_with' => $chat->receiver->detailInfo['name'],
             'messages' => $formattedMessages,
         ];
@@ -58,45 +58,24 @@ class ChatController extends Controller
         return response()->json($response, 200);
     }
 
-//    public function create($login): Response|JsonResponse
-//    {
-        //sender - отправитель (вы)
-        //receiver - получатель
-
-        // $sender = User::with('detailInfo')->find(Auth::id());
-        // if (!$sender) {
-        //     return response()->json(['error' => 'user not found'], 404);
-        // }
-
-        // $receiver = User::where('login', $login)->with('detailInfo')->first();
-        // if (!$receiver) {
-        //     return response()->json(['error' => 'user not found'], 404);
-        // }
-
-        // return Inertia::render('Chat/Create', [
-        //     'sender' => $sender,
-        //     'receiver' => $receiver,
-        // ]);
-//    }
-
     public function store(Request $request)
     {
-        // Валидация данных
         $request->validate([
+            'chatId' => 'required',
             'body' => 'string|max:255',
         ]);
 
-        // Создание нового чата
-        $chat = Chat::updateOrCreate();
+        $message = new ChatMessage([
+            'body' => $request->body,
+            'user_id' => Auth::id(),
+            'chat_id' => $request->chatId,
+        ]);
 
-        // Присоединение пользователей к чату
-        $users = User::find($request->users);
-        $chat->users()->attach($users);
+        $message->save();
 
-        // Добавление текущего пользователя в чат
-        $chat->users()->attach(Auth::user());
+        broadcast(new StoreMessageEvent($message))->toOthers();
 
-        return response()->json(['message' => 'Chat created successfully', 'chat' => $chat], 201);
+        return MessageResource::make($message)->resolve();
     }
 
 }

@@ -67,7 +67,6 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
-    // Route::get('/chat/{login}', [ChatController::class, 'create'])->name('chat.create');
     Route::post('/chat', [ChatController::class, 'store'])->name('chat.store');
     Route::get('/chat/{chatId}', [ChatController::class, 'getMessages'])->name('chat.getMessages');
 });

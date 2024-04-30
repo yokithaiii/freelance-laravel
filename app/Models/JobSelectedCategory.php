@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class JobSelectedCategory extends Model
 {
@@ -16,12 +17,12 @@ class JobSelectedCategory extends Model
         'category_id',
     ];
 
-    public function job()
+    public function job(): BelongsTo
     {
         return $this->belongsTo(Job::class);
     }
 
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(JobCategory::class);
     }

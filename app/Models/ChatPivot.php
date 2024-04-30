@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ChatPivot extends Model
 {
@@ -17,12 +18,12 @@ class ChatPivot extends Model
         'receiver_id',
     ];
 
-    public function chat()
+    public function chat(): BelongsTo
     {
         return $this->belongsTo(Chat::class, 'chat_id');
     }
 
-    public function sender()
+    public function sender(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sender_id');
     }

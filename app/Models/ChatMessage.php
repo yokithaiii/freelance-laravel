@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ChatMessage extends Model
 {
@@ -11,7 +12,13 @@ class ChatMessage extends Model
 
     protected $table = 'chats_messages';
 
-    public function user()
+    protected $fillable = [
+        'body',
+        'user_id',
+        'chat_id',
+    ];
+
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }

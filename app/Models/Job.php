@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Job extends Model
 {
@@ -19,22 +21,22 @@ class Job extends Model
         'user_id'
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(JobCategory::class);
     }
 
-    public function selectedCategory()
+    public function selectedCategory(): HasMany
     {
         return $this->hasMany(JobSelectedCategory::class);
     }
 
-    public function images()
+    public function images(): HasMany
     {
         return $this->hasMany(JobImage::class);
     }
