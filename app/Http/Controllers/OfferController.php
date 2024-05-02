@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NotificationEvent;
+use App\Events\StoreMessageEvent;
 use App\Http\Requests\OfferStoreRequest;
 use App\Models\Chat;
 use App\Models\ChatPivot;
 use App\Models\Job;
 use App\Models\JobOffer;
 use App\Models\JobCategory;
+use App\Models\User;
+use App\Notifications\OfferNotification;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
@@ -68,6 +72,8 @@ class OfferController extends Controller
         //Ожидается
         //Принят
         //Отклонено
+
+        broadcast(new NotificationEvent($offer))->toOthers();
 
         return Redirect::route('offer.index')->with('success', 'Ваше предложение отправлено!');
     }

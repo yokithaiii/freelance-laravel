@@ -8,7 +8,8 @@
     "dependencies": {
         "flowbite": "^2.3.0",
         "flowbite-datepicker": "^1.2.6",
-        "v-mask": "^2.3.0"
+        "v-mask": "^2.3.0",
+        "vuex": "^4.1.0"
     },
     "devDependencies": {
         "@inertiajs/vue3": "^1.0.0",
