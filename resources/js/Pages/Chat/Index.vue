@@ -35,13 +35,14 @@ const submit = async (chatId) => {
     } catch (e) {
         console.error('Ошибка при отправке сообщения:', e);
     } finally {
-        getMessages(chatId);
+        // getMessages(chatId);
     }
 };
 
 onMounted(() => {
     const echoChannel = window.Echo.channel(`chat`)
         .listen('.chat', (res) => {
+            console.log(res)
             chat.value.messages.push(res.message);
         });
 });

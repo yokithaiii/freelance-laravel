@@ -1,6 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
+import store from "@/Store/index.js";
+
+store.dispatch('fetchNotifications');
 </script>
 
 <template>

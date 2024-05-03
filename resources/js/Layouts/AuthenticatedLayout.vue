@@ -87,36 +87,41 @@ onMounted(() => {
 
                                         <template #content>
                                             <div class=" divide-y divide-gray-100 rounded-lg">
-                                                <div class="px-4 py-2 text-sm text-gray-900 dark:text-white">
-                                                    <div>Уведомления</div>
+                                                <div v-if="notifications.length > 0" >
+                                                    <div class="px-4 py-2 text-sm text-gray-900">
+                                                        <div>Уведомления</div>
+                                                    </div>
+                                                    <ul class="py-2 text-sm text-gray-700 w-[400px]"
+                                                        aria-labelledby="avatarButton"
+                                                        >
+                                                        <li v-for="notification in notifications" :key="notification.id" class="py-4 px-4">
+                                                            <div class="flex items-center space-x-4">
+                                                                <div class="flex-shrink-0">
+                                                                    <img class="w-8 h-8 rounded-full" :src="`/storage/${notification.user.detail_info.avatar}`" alt="">
+                                                                </div>
+                                                                <div class="">
+                                                                    <p class="text-sm font-medium text-gray-900">
+                                                                        Исполнитель
+                                                                        <a class="text-blue-600" :href="`/user/${ notification.user.login }`">{{ notification.user.login }}</a>
+                                                                    </p>
+                                                                    <p class="text-sm font-medium text-gray-900">
+                                                                        предлагает свою услугу на Ваш заказ:
+                                                                        <a class="text-blue-600" :href="`/jobs/${ notification.job.id }`">{{ notification.job.title }}</a>
+                                                                    </p>
+                                                                    <p class="text-sm font-medium text-gray-900">
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
+                                                    <div class="py-2 text-center flex justify-center">
+                                                        <a class="text-sm text-blue-600" :href="route('offer.offerNotifications')">
+                                                            Показать все
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                                <ul class="py-2 text-sm text-gray-700 w-[400px]"
-                                                    aria-labelledby="avatarButton"
-                                                    >
-                                                    <li v-for="notification in notifications" :key="notification.id" class="py-4 px-4">
-                                                        <div class="flex items-center space-x-4">
-                                                            <div class="flex-shrink-0">
-                                                                <img class="w-8 h-8 rounded-full" :src="`/storage/${notification.user.detail_info.avatar}`" alt="">
-                                                            </div>
-                                                            <div class="">
-                                                                <p class="text-sm font-medium text-gray-900">
-                                                                    Исполнитель
-                                                                    <a class="text-blue-600" :href="`/user/${ notification.user.login }`">{{ notification.user.login }}</a>
-                                                                </p>
-                                                                <p class="text-sm font-medium text-gray-900">
-                                                                    предлагает свою услугу на Ваш заказ:
-                                                                    <a class="text-blue-600" :href="`/jobs/${ notification.job.id }`">{{ notification.job.title }}</a>
-                                                                </p>
-                                                                <p class="text-sm font-medium text-gray-900">
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                </ul>
-                                                <div class="py-2 text-center flex justify-center">
-                                                    <a class="text-sm text-blue-600" :href="route('offer.offerNotifications')">
-                                                        Показать все
-                                                    </a>
+                                                <div v-else class="py-4 px-4 text-center flex justify-center text-sm">
+                                                    Уведомлений нет
                                                 </div>
                                             </div>
                                         </template>

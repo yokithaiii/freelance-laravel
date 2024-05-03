@@ -13,17 +13,22 @@ createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
+        const app = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(store)
-            .use(ZiggyVue)
-            .mount(el);
+            .use(ZiggyVue);
+
+        store.dispatch('fetchNotifications');
+
+        app.mount(el);
+
+        return app;
     },
     progress: {
         color: '#4B5563',
     },
 });
 
-store.dispatch('fetchNotifications');
+// store.dispatch('fetchNotifications');
 
 
