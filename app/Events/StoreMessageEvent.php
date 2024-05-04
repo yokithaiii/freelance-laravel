@@ -37,6 +37,7 @@ class StoreMessageEvent implements ShouldBroadcast
     {
         return [
             new Channel('chat'),
+//            new PrivateChannel('chat.' . $this->message->chat_id),
         ];
     }
 

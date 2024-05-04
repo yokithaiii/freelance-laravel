@@ -69,7 +69,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat', [ChatController::class, 'store'])->name('chat.store');
-    Route::get('/chat/{chatId}', [ChatController::class, 'getMessages'])->name('chat.getMessages');
+    Route::get('/chat/{login}', [ChatController::class, 'show'])->name('chat.show');
 });
 
 Route::middleware('auth')->group(function () {

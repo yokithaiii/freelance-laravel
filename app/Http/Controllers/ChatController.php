@@ -33,11 +33,13 @@ class ChatController extends Controller
         ]);
     }
 
-    public function getMessages(string $chatId): JsonResponse
+    public function show(string $login): JsonResponse
     {
+        $user = User::where('login', $login)->first();
+
         $chat = ChatPivot::with('chat.messages', 'chat.messages.user.detailInfo', 'receiver.detailInfo')
-            ->where('chat_id', $chatId)
-            ->where('receiver_id', '!=', Auth::id())
+            ->where('sender_id', Auth::id())
+            ->where('receiver_id', $user->id)
             ->first();
 
         if (!$chat) {

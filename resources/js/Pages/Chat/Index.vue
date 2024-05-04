@@ -11,12 +11,13 @@ const props = defineProps({
 const form = useForm({
     body: '',
 });
+
 const chat = ref(null);
 const chat_id = ref('');
 
-const getMessages = async (chatId) => {
+const getMessages = async (login) => {
     try {
-        const response = await axios.get(`/chat/${chatId}`);
+        const response = await axios.get(`/chat/${login}`);
         chat.value = response.data;
         chat_id.value = response.data.id;
     } catch (e) {
@@ -34,8 +35,6 @@ const submit = async (chatId) => {
         form.body = '';
     } catch (e) {
         console.error('Ошибка при отправке сообщения:', e);
-    } finally {
-        // getMessages(chatId);
     }
 };
 
@@ -80,9 +79,8 @@ onMounted(() => {
                                 </header>
 
                                 <div class="overflow-y-auto h-auto p-3">
-
                                     <div v-for="chat in chats" :key="chat.id">
-                                        <div @click="getMessages(chat.chat_id)" class="flex items-center mb-4  hover:bg-gray-100 p-2 rounded-md cursor-pointer">
+                                        <div @click="getMessages(chat.receiver.login)" class="flex items-center mb-4  hover:bg-gray-100 p-2 rounded-md cursor-pointer">
                                             <div class="w-12 h-12 bg-gray-300 rounded-full mr-3">
                                                 <img :src="`/storage/${ chat.receiver.detail_info.avatar }`" alt="User Avatar" class="w-12 h-12 rounded-full">
                                             </div>
