@@ -54,7 +54,9 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/user/{login}', [UserController::class, 'show'])->name('user.show');
+//    Route::get('/user/{login}', [UserController::class, 'show'])->name('user.show');
+    Route::get('/user/{user}', [UserController::class, 'show'])->name('user.show');
+    Route::post('/user/{user}', [UserController::class, 'sendLike'])->name('user.sendLike');
 });
 
 Route::middleware('auth')->group(function () {
@@ -68,8 +70,10 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
-    Route::post('/chat', [ChatController::class, 'store'])->name('chat.store');
+    Route::post('/chat/{user}', [ChatController::class, 'store'])->name('chat.store');
     Route::get('/chat/{login}', [ChatController::class, 'show'])->name('chat.show');
+    Route::patch('/read_message', [ChatController::class, 'readMessage'])->name('chat.readMessage');
+    Route::patch('/read_all_messages', [ChatController::class, 'readAllMessages'])->name('chat.readAllMessages');
 });
 
 Route::middleware('auth')->group(function () {

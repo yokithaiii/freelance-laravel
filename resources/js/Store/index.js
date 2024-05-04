@@ -16,7 +16,6 @@ export default createStore({
     actions: {
         async fetchNotifications({ commit }) {
             const response = await axios.get('/notifications');
-            console.log(response.data)
             commit('SET_NOTIFICATIONS', response.data);
         }
     }

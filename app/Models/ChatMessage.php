@@ -22,4 +22,9 @@ class ChatMessage extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function status()
+    {
+        return $this->hasOne(ChatMessageStatus::class, 'message_id');
+    }
 }

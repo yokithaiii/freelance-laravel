@@ -3,13 +3,8 @@
 namespace App\Events;
 
 use App\Http\Resources\MessageResource;
-use App\Models\ChatMessage;
-use App\Models\User;
-use http\Message;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -18,14 +13,16 @@ class StoreMessageEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    private ChatMessage $message;
+    private $message;
+    private $userId;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(ChatMessage $message)
+    public function __construct($message, $userId)
     {
         $this->message = $message;
+        $this->userId = $userId;
     }
 
     /**
@@ -36,8 +33,7 @@ class StoreMessageEvent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('chat'),
-//            new PrivateChannel('chat.' . $this->message->chat_id),
+            new Channel('chat.' . $this->userId),
         ];
     }
 

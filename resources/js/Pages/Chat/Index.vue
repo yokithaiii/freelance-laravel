@@ -1,11 +1,12 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import {onMounted, ref, watch} from "vue";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import axios from 'axios';
 
 const props = defineProps({
     chats: Array,
+    user: Object
 });
 
 const form = useForm({
@@ -13,13 +14,17 @@ const form = useForm({
 });
 
 const chat = ref(null);
-const chat_id = ref('');
+const user_to_id = ref('');
 
 const getMessages = async (login) => {
     try {
         const response = await axios.get(`/chat/${login}`);
         chat.value = response.data;
-        chat_id.value = response.data.id;
+        user_to_id.value = response.data.chat_with_id;
+
+        axios.patch('/read_all_messages', {
+            chat_id: response.data.id,
+        })
     } catch (e) {
         console.error('Ошибка при получении чата:', e);
     }
@@ -27,11 +32,16 @@ const getMessages = async (login) => {
 
 const submit = async (chatId) => {
     try {
-        const response = await axios.post('/chat', {
+        const response = await axios.post(`chat/${user_to_id.value}`, {
             chatId: chatId,
             body: form.body
         });
         chat.value.messages.push(response.data);
+
+        let foundChat = props.chats.find(chat2 => chat2.chat_id === chatId);
+        foundChat.last_message.body = form.body;
+        foundChat.last_message.user_id = props.user.id;
+
         form.body = '';
     } catch (e) {
         console.error('Ошибка при отправке сообщения:', e);
@@ -39,13 +49,21 @@ const submit = async (chatId) => {
 };
 
 onMounted(() => {
-    const echoChannel = window.Echo.channel(`chat`)
+    const echoChannel = window.Echo.channel(`chat.${props.user.id}`)
         .listen('.chat', (res) => {
-            console.log(res)
-            chat.value.messages.push(res.message);
+            if (chat.value !== null) {
+                chat.value.messages.push(res.message);
+
+                axios.patch('/read_message', {
+                    chat_id: res.message.chat_id,
+                    message_id: res.message.id,
+                })
+            }
+            let foundChat = props.chats.find(chat2 => chat2.chat_id === res.message.chat_id);
+            foundChat.last_message.body = res.message.body;
+            foundChat.last_message.user_id = res.message.user.id;
         });
 });
-
 </script>
 
 <template>
@@ -107,10 +125,13 @@ onMounted(() => {
                                 <div class="h-screen overflow-y-auto p-4 bg-gray-100" style="height: calc(100vh - 320px);">
 
                                     <div v-for="message in chat.messages" :key="message.id">
+
                                         <div class="flex w-full mt-2 space-x-3 max-w-xs ml-auto justify-end" v-if="message.user.id === $page.props.auth.user.id">
                                             <div class="text-right">
                                                 <div class="bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg">
                                                     <p class="text-sm font-normal text-white">{{ message.body }}</p>
+                                                    <span v-if="message.is_read" class="text-sm font-normal text-gray-300">Прочитано</span>
+                                                    <span v-else class="text-sm font-normal text-gray-300">Доставлено</span>
                                                 </div>
                                                 <span class="text-xs text-gray-500 leading-none">{{ message.created_at }}</span>
                                             </div>
