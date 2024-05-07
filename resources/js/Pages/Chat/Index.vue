@@ -104,7 +104,7 @@ onMounted(() => {
                                             </div>
                                             <div class="flex-1">
                                                 <h2 class="text-lg font-semibold">{{ chat.receiver.detail_info.name }}</h2>
-                                                <p class="text-gray-600" v-if="chat.last_message">
+                                                <p class="text-gray-600" v-if="chat.last_message.body">
                                                     <span v-if="chat.last_message.user_id === $page.props.auth.user.id">Вы: </span>
                                                     {{ chat.last_message.body }}
                                                 </p>
@@ -130,8 +130,8 @@ onMounted(() => {
                                             <div class="text-right">
                                                 <div class="bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg">
                                                     <p class="text-sm font-normal text-white">{{ message.body }}</p>
-                                                    <span v-if="message.is_read" class="text-sm font-normal text-gray-300">Прочитано</span>
-                                                    <span v-else class="text-sm font-normal text-gray-300">Доставлено</span>
+<!--                                                    <span v-if="message.is_read" class="text-sm font-normal text-gray-300">Прочитано</span>-->
+<!--                                                    <span v-else class="text-sm font-normal text-gray-300">Доставлено</span>-->
                                                 </div>
                                                 <span class="text-xs text-gray-500 leading-none">{{ message.created_at }}</span>
                                             </div>

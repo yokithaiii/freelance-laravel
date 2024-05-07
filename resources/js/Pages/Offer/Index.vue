@@ -45,10 +45,10 @@ const formatDate = (inputDate) => {
 
                         <ul role="list" class="max-w divide-y divide-gray-200 dark:divide-gray-700">
                             <li v-for="offer in offers" :key="offer.id" class="py-4 px-4 hover:bg-gray-100">
-                                <a :href="`/chat/${ offer.job.user.login }`">
+                                <a :href="`/jobs/${ offer.job.id }`">
                                     <div class="flex items-center space-x-4 rtl:space-x-reverse">
                                         <div class="flex-shrink-0">
-                                            <img v-if="offer.job.user.detail_info.avatar" class="w-8 h-8 rounded-full" :src="`/storage/${ offer.job.user.detail_info.avatar }`">
+                                            <img v-if="offer.job.user.detail_info.avatar" class="w-12 h-12 rounded-full" :src="`/storage/${ offer.job.user.detail_info.avatar }`">
                                             <div v-else class="relative w-14 h-14 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
                                                 <svg class="absolute w-16 h-16 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
                                             </div>

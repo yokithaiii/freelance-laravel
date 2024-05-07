@@ -91,7 +91,7 @@ class OfferController extends Controller
         ]);
     }
 
-    public function offerAccept(Request $request): JsonResponse
+    public function offerAccept(Request $request): Response|JsonResponse
     {
         $offer = JobOffer::find($request->offer_id);
         if (!$offer) {
@@ -116,7 +116,9 @@ class OfferController extends Controller
             'receiver_id' => $request->offer_from_id,
         ]);
 
-        return response()->json(['message' => 'Offer accepted succesfully.'], 200);
+        return Inertia::render('Chat/Index', [
+            'offer' => $offer,
+        ]);
     }
 
     public function offerDecline(Request $request): JsonResponse

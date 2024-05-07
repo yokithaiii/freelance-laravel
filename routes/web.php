@@ -54,9 +54,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-//    Route::get('/user/{login}', [UserController::class, 'show'])->name('user.show');
-    Route::get('/user/{user}', [UserController::class, 'show'])->name('user.show');
-    Route::post('/user/{user}', [UserController::class, 'sendLike'])->name('user.sendLike');
+    Route::get('/user/{login}', [UserController::class, 'show'])->name('user.show');
 });
 
 Route::middleware('auth')->group(function () {

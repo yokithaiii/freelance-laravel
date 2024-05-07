@@ -37,31 +37,11 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-//    public function show(string $login): Response
-//    {
-//        $user = User::query()->where('login', $login)->with('detailInfo')->first();
-//        return Inertia::render('User/User', [
-//            'user' => $user,
-//        ]);
-//    }
-
-    public function show(User $user)
+    public function show(string $login): Response
     {
-        return Inertia::render('User/Show', compact('user'));
-    }
-
-    public function sendLike(User $user, Request $request)
-    {
-        $data = $request->validate([
-            'from_id' => 'required',
-        ]);
-
-        $like_str = 'Your like from with id '.$data['from_id'];
-
-        broadcast(new SendLikeEvent($like_str, $user->id))->toOthers();
-
-        return response()->json([
-            'like_str' => $like_str
+        $user = User::query()->where('login', $login)->with('detailInfo')->first();
+        return Inertia::render('User/User', [
+            'user' => $user,
         ]);
     }
 

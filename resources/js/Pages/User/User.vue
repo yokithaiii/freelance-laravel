@@ -37,7 +37,7 @@ const props = defineProps({
                         <div class="col-span-4 sm:col-span-3">
                             <div class="bg-white shadow rounded-lg p-6">
                                 <div class="flex flex-col items-start">
-                                    <img :src="`/storage/${ user.detail_info.avatar }`" class="w-full h-auto max-h-[250px] object-cover bg-gray-300 rounded-md mb-4 shrink-0"/>
+                                    <img :src="`/storage/${ user.detail_info.avatar }`" class="w-full h-[250px] max-h-[250px] object-cover bg-gray-300 rounded-md mb-4 shrink-0"/>
                                     <h2 class="text-xl font-bold">{{ user.detail_info.name }}</h2>
                                     <p class="text-gray-700">{{ user.detail_info.profession }}</p>
                                     <div class="mt-2 flex flex-wrap gap-2">
@@ -51,17 +51,17 @@ const props = defineProps({
                                 <div class="flex flex-col">
                                     <span class="text-gray-700 uppercase font-bold tracking-wider mb-2">Contacts</span>
                                     <ul>
-                                        <li class="mb-2">
+                                        <li v-if="user.email" class="mb-2">
                                             <a href="#">
                                                 email: {{ user.email }}
                                             </a>
                                         </li>
-                                        <li class="mb-2">
+                                        <li v-if="user.detail_info.contact_phone" class="mb-2">
                                             <a href="#">
                                                 wa: {{ user.detail_info.contact_phone }}
                                             </a>
                                         </li>
-                                        <li class="mb-2">
+                                        <li v-if="user.detail_info.contact_telegram" class="mb-2">
                                             <a href="#">
                                                 tg: @{{ user.detail_info.contact_telegram }}
                                             </a>
@@ -73,8 +73,11 @@ const props = defineProps({
                         <div class="col-span-4 sm:col-span-9">
                             <div class="bg-white shadow rounded-lg p-6">
                                 <h2 class="text-xl font-bold mb-4">About Me</h2>
-                                <p class="text-gray-700">
+                                <p class="text-gray-700" v-if="user.detail_info.about_text">
                                     {{ user.detail_info.about_text }}
+                                </p>
+                                <p class="text-gray-700" v-else>
+                                    Описание профиля отсутствует
                                 </p>
                             </div>
                         </div>
