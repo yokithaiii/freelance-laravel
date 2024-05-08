@@ -10,4 +10,9 @@ class JobCategory extends Model
     use HasFactory;
 
     protected $table = 'jobs_categories';
+
+    protected $fillable = [
+        'name',
+        'parent_id'
+    ];
 }

@@ -58,6 +58,9 @@ onMounted(() => {
                                     <NavLink :href="route('chat.index')" :active="route().current('chat.index')">
                                         Chat
                                     </NavLink>
+                                    <NavLink :href="route('admin.index')" :active="route().current('admin.index')">
+                                        Admin panel
+                                    </NavLink>
                                 </div>
                             </div>
                         </div>

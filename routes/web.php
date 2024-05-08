@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\NotificationController;
@@ -33,6 +34,12 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+    Route::get('/admin/categories', [AdminController::class, 'createCategories'])->name('admin.createCategories');
+    Route::post('/admin/categories', [AdminController::class, 'storeCategories'])->name('admin.storeCategories');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
