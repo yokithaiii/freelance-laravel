@@ -27,7 +27,8 @@ class MessageResource extends JsonResource
             ],
             'created_at' => $this->created_at->diffForHumans(),
             'chat_id' => $this->chat_id,
-            'is_read' => $this->status->is_read
+            'is_read' => $this->status->is_read,
+            'is_image' => $this->image,
         ];
 
     }

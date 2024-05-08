@@ -27,4 +27,9 @@ class ChatMessage extends Model
     {
         return $this->hasOne(ChatMessageStatus::class, 'message_id');
     }
+
+    public function image()
+    {
+        return $this->hasOne(ChatMessageImage::class, 'message_id');
+    }
 }

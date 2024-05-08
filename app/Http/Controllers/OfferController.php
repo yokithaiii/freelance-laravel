@@ -54,8 +54,17 @@ class OfferController extends Controller
         $job->detail_info = $job->User->detailInfo;
         $job->selected_categories = $selectedCategories;
 
+        $offer = JobOffer::where('job_id', $id)
+            ->where('executor_id', Auth::id())
+            ->first();
+        $offer_exist = false;
+        if ($offer) {
+            $offer_exist = true;
+        }
+
         return Inertia::render('Offer/Create', [
             'job' => $job,
+            'offer_exist' => $offer_exist,
         ]);
     }
 
@@ -116,9 +125,7 @@ class OfferController extends Controller
             'receiver_id' => $request->offer_from_id,
         ]);
 
-        return Inertia::render('Chat/Index', [
-            'offer' => $offer,
-        ]);
+        return Inertia::render('Chat/Index');
     }
 
     public function offerDecline(Request $request): JsonResponse

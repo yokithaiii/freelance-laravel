@@ -32,7 +32,7 @@ const formatDate = (inputDate) => {
                 <div v-if="offers.length === 0" class="container mx-auto py-8">
                     <div class="w-full">
                         <div class="bg-white shadow rounded-lg p-6">
-                            <p>Offers not found.</p>
+                            <p>Предложения не найдены.</p>
                         </div>
                     </div>
                 </div>

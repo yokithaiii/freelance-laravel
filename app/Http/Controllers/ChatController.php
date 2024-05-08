@@ -7,8 +7,11 @@ use App\Http\Requests\MessageStoreRequest;
 use App\Http\Resources\MessageResource;
 use App\Models\Chat;
 use App\Models\ChatMessage;
+use App\Models\ChatMessageImage;
 use App\Models\ChatMessageStatus;
 use App\Models\ChatPivot;
+use App\Models\JobImage;
+use App\Models\JobOffer;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -41,7 +44,7 @@ class ChatController extends Controller
     {
         $user = User::where('login', $login)->first();
 
-        $chat = ChatPivot::with('chat.messages', 'chat.messages.user.detailInfo', 'receiver.detailInfo', 'chat.messages.status')
+        $chat = ChatPivot::with('chat.messages', 'chat.messages.image', 'chat.messages.user.detailInfo', 'receiver.detailInfo', 'chat.messages.status')
             ->where('sender_id', Auth::id())
             ->where('receiver_id', $user->id)
             ->first();
@@ -55,30 +58,56 @@ class ChatController extends Controller
             $formattedMessages[] = new MessageResource($message);
         }
 
+        $offer = JobOffer::with('job')
+            ->where(function($query) use ($user) {
+                $query->where('customer_id', $user->id)
+                    ->orWhere('executor_id', $user->id);
+            })
+            ->where(function($query) {
+                $query->where('customer_id', Auth::id())
+                    ->orWhere('executor_id', Auth::id());
+            })
+            ->first();
+
         $response = [
             'id' => $chat->chat_id,
             'chat_with' => $chat->receiver->detailInfo['name'],
             'chat_with_id' => $chat->receiver->id,
+            'offer' => $offer,
             'messages' => $formattedMessages,
         ];
 
         return response()->json($response, 200);
     }
 
-    public function store(Request $request, User $user): array
+    public function store(Request $request, User $user): array|JsonResponse
     {
         $request->validate([
             'chatId' => 'required',
-            'body' => 'string|max:255',
         ]);
 
         $message = new ChatMessage([
-            'body' => $request->body,
+            'body' => 'file',
             'user_id' => Auth::id(),
             'chat_id' => $request->chatId,
         ]);
 
         $message->save();
+
+        if ($request->hasFile('files')) {
+            $file = $request->file('files');
+
+            $file_name = $file->getClientOriginalName();
+            $file_path = $file->store('uploads', 'public');
+            $messageImage = new ChatMessageImage([
+                'chat_id' => $request->chatId,
+                'message_id' => $message->id,
+                'user_id' => Auth::id(),
+                'file_name' => $file_name,
+                'file_path' => $file_path,
+            ]);
+            $messageImage->save();
+        }
 
         $messageStatus = new ChatMessageStatus([
             'chat_id' => $message->chat_id,

@@ -52,6 +52,9 @@ const props = defineProps({
                             Это вы
                         </span>
                     </span>
+                    <span class="font-medium dark:text-white">
+                        Размещено заказов: {{ job.user.detail_info.jobs_count }}
+                    </span>
                 </div>
             </div>
         </div>

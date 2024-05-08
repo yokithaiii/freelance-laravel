@@ -56,7 +56,7 @@ class JobController extends Controller
         ]);
     }
 
-    public function store(JobStoreRequest $request): RedirectResponse
+    public function store(JobStoreRequest $request): RedirectResponse|JsonResponse
     {
         $job = $this->jobService->createJob($request);
 
@@ -66,6 +66,7 @@ class JobController extends Controller
             $this->fileService->saveFiles($request, $job);
         }
 
+//        return response()->json(['message' => $job]);
         return Redirect::route('jobs.index')->with('success', 'Новый заказ успешно добавлен!');
     }
 

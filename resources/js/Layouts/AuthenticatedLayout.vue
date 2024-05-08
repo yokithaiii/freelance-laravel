@@ -42,18 +42,8 @@ onMounted(() => {
                             <!-- Navigation Links -->
                             <div class="hidden md:block">
                                 <div class="ml-10 flex items-baseline space-x-4">
-                                    <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-                                    <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                        Dashboard
-                                    </NavLink>
                                     <NavLink :href="route('jobs.index')" :active="route().current('jobs.index')">
                                         Jobs
-                                    </NavLink>
-                                    <NavLink :href="route('jobs.manage')" :active="route().current('jobs.manage')">
-                                        Manage jobs
-                                    </NavLink>
-                                    <NavLink :href="route('offer.index')" :active="route().current('offer.index')">
-                                        My Offers
                                     </NavLink>
                                     <NavLink :href="route('chat.index')" :active="route().current('chat.index')">
                                         Chat
@@ -174,6 +164,14 @@ onMounted(() => {
                                                     <li>
                                                         <DropdownLink :href="`/user/${ $page.props.auth.user.login }`">
                                                             Профиль
+                                                        </DropdownLink>
+                                                    </li>
+                                                    <li>
+                                                        <DropdownLink :href="route('jobs.manage')"> Мои заказы
+                                                        </DropdownLink>
+                                                    </li>
+                                                    <li>
+                                                        <DropdownLink :href="route('offer.index')"> Мои предложения
                                                         </DropdownLink>
                                                     </li>
                                                     <li>
