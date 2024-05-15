@@ -4,15 +4,18 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import axios from 'axios';
 import { Modal } from "flowbite";
+import InputLabel from "@/Components/InputLabel.vue";
+import TextInput from "@/Components/TextInput.vue";
 
 const props = defineProps({
-    chats: Array,
+    rooms: Array,
     user: Object
 });
 
 const form = useForm({
     body: '',
-    files: null
+    files: null,
+    file_caption: '',
 });
 
 const chat = ref(null);
@@ -60,11 +63,6 @@ const getMessages = async (login) => {
         const response = await axios.get(`/chat/${login}`);
         chat.value = response.data;
         user_to_id.value = response.data.chat_with_id;
-
-        axios.patch('/read_all_messages', {
-            chat_id: response.data.id,
-        })
-
         offer.value = response.data.offer;
     } catch (e) {
         console.error('Ошибка при получении чата:', e);
@@ -73,12 +71,14 @@ const getMessages = async (login) => {
 
 const submit = async (chatId) => {
     try {
-        console.log(form.files)
         let formData = new FormData();
         formData.append('chatId', chatId);
         formData.append('body', form.body);
         if (form.files) {
             formData.append('files', form.files);
+            formData.append('body', 'Файл');
+            formData.append('file_caption', form.file_caption);
+            form.body = 'Файл';
         }
 
         const response = await axios.post(`chat/${user_to_id.value}`, formData, {
@@ -89,14 +89,18 @@ const submit = async (chatId) => {
 
         chat.value.messages.push(response.data);
 
-        let foundChat = props.chats.find(chat2 => chat2.chat_id === chatId);
-        foundChat.last_message.body = form.body;
-        foundChat.last_message.user_id = props.user.id;
+        let foundChat = props.rooms.find(chat2 => chat2.chat.id === chatId);
+        foundChat.chat.last_message.body = form.body;
+        foundChat.chat.last_message.user_id = props.user.id;
 
         form.body = '';
         form.files = null;
     } catch (e) {
         console.error('Ошибка при отправке сообщения:', e);
+    } finally {
+        if (modalInstance.value) {
+            modalInstance.value.hide();
+        }
     }
 };
 
@@ -105,15 +109,10 @@ onMounted(() => {
         .listen('.chat', (res) => {
             if (chat.value !== null) {
                 chat.value.messages.push(res.message);
-
-                axios.patch('/read_message', {
-                    chat_id: res.message.chat_id,
-                    message_id: res.message.id,
-                })
             }
-            let foundChat = props.chats.find(chat2 => chat2.chat_id === res.message.chat_id);
-            foundChat.last_message.body = res.message.body;
-            foundChat.last_message.user_id = res.message.user.id;
+            let foundChat = props.rooms.find(chat2 => chat2.chat_id === res.message.chat_id);
+            foundChat.chat.last_message.body = res.message.body;
+            foundChat.chat.last_message.user_id = res.message.user.id;
         });
 });
 </script>
@@ -130,10 +129,10 @@ onMounted(() => {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-                <div v-if="chats.length === 0" class="container mx-auto py-8">
+                <div v-if="rooms.length === 0" class="container mx-auto py-8">
                     <div class="w-full">
                         <div class="bg-white shadow rounded-lg p-6">
-                            <p>Chats not found.</p>
+                            <p>Rooms not found.</p>
                         </div>
                     </div>
                 </div>
@@ -149,16 +148,16 @@ onMounted(() => {
                                 </header>
 
                                 <div class="overflow-y-auto h-auto p-3">
-                                    <div v-for="chat in chats" :key="chat.id">
+                                    <div v-for="chat in rooms" :key="chat.id">
                                         <div @click="getMessages(chat.receiver.login)" class="flex items-center mb-4  hover:bg-gray-100 p-2 rounded-md cursor-pointer">
                                             <div class="w-12 h-12 bg-gray-300 rounded-full mr-3">
-                                                <img :src="`/storage/${ chat.receiver.detail_info.avatar }`" alt="User Avatar" class="w-12 h-12 rounded-full">
+                                                <img :src="`/storage/${ chat.receiver.details.avatar }`" alt="User Avatar" class="w-12 h-12 rounded-full">
                                             </div>
                                             <div class="flex-1">
-                                                <h2 class="text-lg font-semibold">{{ chat.receiver.detail_info.name }}</h2>
-                                                <p class="text-gray-600" v-if="chat.last_message.body">
-                                                    <span v-if="chat.last_message.user_id === $page.props.auth.user.id">Вы: </span>
-                                                    {{ chat.last_message.body }}
+                                                <h2 class="text-lg font-semibold">{{ chat.receiver.details.name }}</h2>
+                                                <p class="text-gray-600" v-if="chat.chat.last_message.body">
+                                                    <span v-if="chat.chat.last_message.user_id === $page.props.auth.user.id">Вы: </span>
+                                                    {{ chat.chat.last_message.body }}
                                                 </p>
                                                 <p class="text-gray-600" v-else>Сообщений пока нет</p>
                                             </div>
@@ -179,30 +178,30 @@ onMounted(() => {
                                     <div class="mb-4 w-full bg-gray-200 rounded-md">
                                         <div class="py-4 px-4 flex flex-col gap-4">
                                             <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-medium text-gray-900  dark:text-white">
-                                                    Название заказа: {{ chat.offer.job.title }}
+                                                <p class="text-sm font-medium text-gray-900">
+                                                    Название заказа: {{ chat.offer.offer_job.title }}
                                                 </p>
-                                                <p class="text-sm font-regular text-gray-900  dark:text-white">
-                                                    {{ chat.offer.job.description }}
+                                                <p class="text-sm font-regular text-gray-900">
+                                                    {{ chat.offer.offer_job.description }}
                                                 </p>
-                                                <p class="text-sm font-medium text-gray-900  dark:text-white">
-                                                    Сумма: {{ chat.offer.job.price }}
+                                                <p class="text-sm font-medium text-gray-900">
+                                                    Сумма: {{ chat.offer.offer_job.price }}
                                                 </p>
-                                                <p class="text-sm font-medium text-gray-900  dark:text-white">
-                                                    Срок до: {{ chat.offer.job.date_deadline }}
+                                                <p class="text-sm font-medium text-gray-900">
+                                                    Срок до: {{ chat.offer.offer_job.date_deadline }}
                                                 </p>
-                                                <p class="text-sm text-gray-500  dark:text-gray-400">
+                                                <p class="text-sm font-medium text-gray-900">
                                                     Заказчик: {{ chat.chat_with }}
                                                 </p>
                                             </div>
                                             <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-medium text-gray-900  dark:text-white">
+                                                <p class="text-sm font-medium text-gray-900">
                                                     Исполнитель откликнулся сделав предложение: {{ chat.offer.offer_description }}
                                                 </p>
-                                                <p class="text-sm font-regular text-gray-900  dark:text-white">
+                                                <p class="text-sm font-regular text-gray-900">
                                                     За сумму: {{ chat.offer.offer_price }}
                                                 </p>
-                                                <p class="text-sm font-medium text-gray-900  dark:text-white">
+                                                <p class="text-sm font-medium text-gray-900">
                                                     Срок: {{ chat.offer.offer_date_deadline_days }} дней
                                                 </p>
                                             </div>
@@ -214,14 +213,17 @@ onMounted(() => {
                                         <div class="flex w-full mt-2 space-x-3 max-w-xs ml-auto justify-end" v-if="message.user.id === $page.props.auth.user.id">
                                             <div class="text-right">
                                                 <div class="bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg">
-                                                    <div class="group relative my-2.5" v-if="message.is_image !== null">
-                                                        <img :src="`/storage/${ message.is_image.file_path }`" class="rounded-lg" />
+                                                    <div v-if="message.is_image === true">
+                                                        <p class="text-sm font-normal text-white" v-if="message.image.file_caption !== null">
+                                                            {{ message.image.file_caption }}
+                                                        </p>
+                                                        <div class="group relative my-2.5" >
+                                                            <img :src="`/storage/${ message.image.file_path }`" class="rounded-lg" />
+                                                        </div>
                                                     </div>
                                                     <p v-else class="text-sm font-normal text-white">{{ message.body }}</p>
-<!--                                                    <span v-if="message.is_read" class="text-sm font-normal text-gray-300">Прочитано</span>-->
-<!--                                                    <span v-else class="text-sm font-normal text-gray-300">Доставлено</span>-->
                                                 </div>
-                                                <span class="text-xs text-gray-500 leading-none">{{ message.created_at }}</span>
+                                                <span class="text-xs text-gray-500 leading-none">{{ message.created_time }}</span>
                                             </div>
                                             <img class="w-10 h-10 rounded-full" :src="`/storage/${ message.user.avatar }`" alt="">
                                         </div>
@@ -230,19 +232,19 @@ onMounted(() => {
                                             <img class="w-10 h-10 rounded-full" :src="`/storage/${ message.user.avatar }`" alt="">
                                             <div>
                                                 <div class="bg-gray-300 p-3 rounded-r-lg rounded-bl-lg">
-                                                    <div class="group relative my-2.5" v-if="message.is_image !== null">
+                                                    <div class="group relative my-2.5" v-if="message.is_image === true">
                                                         <div class="absolute w-full h-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
-                                                            <a :href="`/storage/${ message.is_image.file_path }`" download class="inline-flex items-center justify-center rounded-full h-10 w-10 bg-white/30 hover:bg-white/50 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50">
+                                                            <a :href="`/storage/${ message.image.file_path }`" download class="inline-flex items-center justify-center rounded-full h-10 w-10 bg-white/30 hover:bg-white/50 focus:ring-4 focus:outline-none focus:ring-gray-50">
                                                                 <svg class="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 18">
                                                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 1v11m0 0 4-4m-4 4L4 8m11 4v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3"/>
                                                                 </svg>
                                                             </a>
                                                         </div>
-                                                        <img :src="`/storage/${ message.is_image.file_path }`" class="rounded-lg" />
+                                                        <img :src="`/storage/${ message.image.file_path }`" class="rounded-lg" />
                                                     </div>
                                                     <p v-else class="text-sm">{{ message.body }}</p>
                                                 </div>
-                                                <span class="text-xs text-gray-500 leading-none">{{ message.created_at }}</span>
+                                                <span class="text-xs text-gray-500 leading-none">{{ message.created_time }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -308,8 +310,26 @@ onMounted(() => {
                                 <label for="dropzone-file" class="p-4 flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
                                     <input id="dropzone-file" v-on:change="fileHandler"  type="file" class="hidden" />
                                     <img v-if="tempAvatarUrl" class="rounded-md w-full h-full object-cover" :src="tempAvatarUrl" alt="image description">
+                                    <div v-else class="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                                        </svg>
+                                        <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                                    </div>
                                 </label>
                             </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <InputLabel for="caption" value="Подпись" class="text-left" />
+
+                            <TextInput
+                                id="caption"
+                                type="text"
+                                class="mt-1 block w-full"
+                                v-model="form.file_caption"
+                            />
                         </div>
 
                         <div class="mt-4 flex justify-end">

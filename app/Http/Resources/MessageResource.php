@@ -20,15 +20,19 @@ class MessageResource extends JsonResource
         return [
             'id' => $this->id,
             'body' => $this->body,
+            'created_date' => $this->created_at->format('d.m.Y'),
+            'created_time' => $this->created_at->format('H:i'),
+            'is_image' => $this->image ? true : false,
+            'image' => [
+                'file_name' => $this->image ? $this->image->file_name : null,
+                'file_path' => $this->image ? $this->image->file_path : null,
+                'file_caption' => $this->image ? $this->image->file_caption : null,
+            ],
             'user' => [
                 'id' => $this->user->id,
                 'name' => $this->user->detailInfo->name,
                 'avatar' => $this->user->detailInfo->avatar,
             ],
-            'created_at' => $this->created_at->diffForHumans(),
-            'chat_id' => $this->chat_id,
-            'is_read' => $this->status->is_read,
-            'is_image' => $this->image,
         ];
 
     }

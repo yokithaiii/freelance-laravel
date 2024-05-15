@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Events\StoreMessageEvent;
-use App\Http\Requests\MessageStoreRequest;
+use App\Http\Resources\ChatOfferResource;
+use App\Http\Resources\ChatResource;
 use App\Http\Resources\MessageResource;
-use App\Models\Chat;
+use App\Http\Resources\RoomResource;
 use App\Models\ChatMessage;
 use App\Models\ChatMessageImage;
 use App\Models\ChatMessageStatus;
 use App\Models\ChatPivot;
-use App\Models\JobImage;
 use App\Models\JobOffer;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -23,19 +23,19 @@ class ChatController extends Controller
 {
     public function index(): Response
     {
-        $chats = ChatPivot::with('receiver', 'receiver.detailInfo', 'chat', 'chat.messages', 'chat.messages.status')
+        $rooms = ChatPivot::with('receiver.detailInfo', 'chat.messages')
             ->where('sender_id', Auth::id())
             ->get();
 
-        $chats->each(function ($chat) {
-            $lastMessage = $chat->chat->messages->last();
-            $chat->last_message = $lastMessage ? $lastMessage : [];
-        });
+        $roomRes = [];
+        foreach ($rooms as $room) {
+            $roomRes[] = RoomResource::make($room)->resolve();
+        }
 
         $user = User::find(Auth::id());
 
         return Inertia::render('Chat/Index', [
-            'chats' => $chats,
+            'rooms' => $roomRes,
             'user' => $user,
         ]);
     }
@@ -55,7 +55,7 @@ class ChatController extends Controller
 
         $formattedMessages = [];
         foreach ($chat->chat->messages as $message) {
-            $formattedMessages[] = new MessageResource($message);
+            $formattedMessages[] = MessageResource::make($message)->resolve();
         }
 
         $offer = JobOffer::with('job')
@@ -73,7 +73,7 @@ class ChatController extends Controller
             'id' => $chat->chat_id,
             'chat_with' => $chat->receiver->detailInfo['name'],
             'chat_with_id' => $chat->receiver->id,
-            'offer' => $offer,
+            'offer' => ChatOfferResource::make($offer)->resolve(),
             'messages' => $formattedMessages,
         ];
 
@@ -87,7 +87,7 @@ class ChatController extends Controller
         ]);
 
         $message = new ChatMessage([
-            'body' => 'file',
+            'body' => $request->body,
             'user_id' => Auth::id(),
             'chat_id' => $request->chatId,
         ]);
@@ -105,6 +105,7 @@ class ChatController extends Controller
                 'user_id' => Auth::id(),
                 'file_name' => $file_name,
                 'file_path' => $file_path,
+                'file_caption' => $request->file_caption ? $request->file_caption : null,
             ]);
             $messageImage->save();
         }
@@ -120,34 +121,6 @@ class ChatController extends Controller
         broadcast(new StoreMessageEvent($message, $user->id))->toOthers();
 
         return MessageResource::make($message)->resolve();
-    }
-
-    public function readMessage(Request $request): void
-    {
-        $request->validate([
-            'chat_id' => 'required',
-            'message_id' => 'required',
-        ]);
-
-        ChatMessageStatus::where('chat_id', $request->chat_id)
-            ->where('message_id', $request->message_id)
-            ->update(['is_read' => true]);
-    }
-
-    public function readAllMessages(Request $request)
-    {
-        $request->validate([
-            'chat_id' => 'required',
-        ]);
-
-        $messages = ChatMessage::where('chat_id', $request->chat_id)->get();
-        foreach ($messages as $message) {
-            $messageStatus = ChatMessageStatus::where('message_id', $message->id)->first();
-            if ($messageStatus) {
-                $messageStatus->is_read = true;
-                $messageStatus->save();
-            }
-        }
     }
 
 }

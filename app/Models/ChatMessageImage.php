@@ -17,6 +17,7 @@ class ChatMessageImage extends Model
         'message_id',
         'file_name',
         'file_path',
+        'file_caption',
     ];
 
 }
