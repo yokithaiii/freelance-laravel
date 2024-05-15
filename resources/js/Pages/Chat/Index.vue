@@ -232,15 +232,20 @@ onMounted(() => {
                                             <img class="w-10 h-10 rounded-full" :src="`/storage/${ message.user.avatar }`" alt="">
                                             <div>
                                                 <div class="bg-gray-300 p-3 rounded-r-lg rounded-bl-lg">
-                                                    <div class="group relative my-2.5" v-if="message.is_image === true">
-                                                        <div class="absolute w-full h-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
-                                                            <a :href="`/storage/${ message.image.file_path }`" download class="inline-flex items-center justify-center rounded-full h-10 w-10 bg-white/30 hover:bg-white/50 focus:ring-4 focus:outline-none focus:ring-gray-50">
-                                                                <svg class="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 18">
-                                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 1v11m0 0 4-4m-4 4L4 8m11 4v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3"/>
-                                                                </svg>
-                                                            </a>
+                                                    <div v-if="message.image.file_caption !== null">
+                                                        <p class="text-sm font-normal text-gray-900">
+                                                            {{ message.image.file_caption }}
+                                                        </p>
+                                                        <div class="group relative my-2.5" v-if="message.is_image === true">
+                                                            <div class="absolute w-full h-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
+                                                                <a :href="`/storage/${ message.image.file_path }`" download class="inline-flex items-center justify-center rounded-full h-10 w-10 bg-white/30 hover:bg-white/50 focus:ring-4 focus:outline-none focus:ring-gray-50">
+                                                                    <svg class="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 18">
+                                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 1v11m0 0 4-4m-4 4L4 8m11 4v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3"/>
+                                                                    </svg>
+                                                                </a>
+                                                            </div>
+                                                            <img :src="`/storage/${ message.image.file_path }`" class="rounded-lg" />
                                                         </div>
-                                                        <img :src="`/storage/${ message.image.file_path }`" class="rounded-lg" />
                                                     </div>
                                                     <p v-else class="text-sm">{{ message.body }}</p>
                                                 </div>
