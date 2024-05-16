@@ -5,6 +5,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OfferController;
 use Illuminate\Foundation\Application;
@@ -81,6 +82,12 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notification.index');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/services', [ServiceController::class, 'index'])->name('service.index');
+    Route::get('/services/create', [ServiceController::class, 'create'])->name('service.create');
+    Route::post('/services/create', [ServiceController::class, 'store'])->name('service.store');
 });
 
 require __DIR__.'/auth.php';
