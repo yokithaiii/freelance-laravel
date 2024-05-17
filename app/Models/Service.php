@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Service extends Model
 {
@@ -22,9 +23,14 @@ class Service extends Model
         'user_id'
     ];
 
-    public function cover(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(ServiceCover::class);
+        return $this->belongsTo(User::class);
+    }
+
+    public function cover(): HasOne
+    {
+        return $this->hasOne(ServiceCover::class);
     }
 
     public function images(): HasMany

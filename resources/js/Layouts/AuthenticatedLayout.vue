@@ -42,6 +42,9 @@ onMounted(() => {
                             <!-- Navigation Links -->
                             <div class="hidden md:block">
                                 <div class="ml-10 flex items-baseline space-x-4">
+                                    <NavLink :href="route('service.index')" :active="route().current('service.index')">
+                                        Services
+                                    </NavLink>
                                     <NavLink :href="route('jobs.index')" :active="route().current('jobs.index')">
                                         Jobs
                                     </NavLink>

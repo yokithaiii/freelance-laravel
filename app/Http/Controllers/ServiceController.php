@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\BuildCategoryTreeAction;
 use App\Http\Requests\ServiceStoreRequest;
+use App\Http\Resources\ServiceResource;
 use App\Models\JobCategory;
 use App\Models\Service;
 use App\Models\ServiceCover;
@@ -23,7 +24,12 @@ class ServiceController extends Controller
 
     public function index()
     {
-        return Inertia::render('Service/Index');
+        $services = Service::with('cover', 'images', 'user.detailInfo')
+            ->get();
+
+        return Inertia::render('Service/Index', [
+            'services' => ServiceResource::collection($services),
+        ]);
     }
 
     public function create() {
@@ -91,5 +97,16 @@ class ServiceController extends Controller
         }
 
         return response()->json($service, 201);
+    }
+
+    public function show($id)
+    {
+        $service = Service::where('id', $id)
+            ->with('cover', 'images', 'user.detailInfo')
+            ->first();
+
+        return Inertia::render('Service/Detail', [
+            'service' => ServiceResource::make($service),
+        ]);
     }
 }
