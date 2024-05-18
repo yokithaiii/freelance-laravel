@@ -10,21 +10,20 @@ use App\Models\Service;
 use App\Models\ServiceCover;
 use App\Models\ServiceImage;
 use App\Models\ServiceSelectedCategory;
+use App\Services\CategoryService;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ServiceController extends Controller
 {
-    public function __construct(
-        BuildCategoryTreeAction $categoryTreeAction,
-    )
+    public function __construct(BuildCategoryTreeAction $categoryTreeAction)
     {
         $this->categoryTreeAction = $categoryTreeAction;
     }
 
     public function index()
     {
-        $services = Service::with('cover', 'images', 'user.detailInfo')
+        $services = Service::with('cover', 'images', 'categories', 'user.detailInfo')
             ->get();
 
         return Inertia::render('Service/Index', [

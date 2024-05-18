@@ -38,4 +38,9 @@ class Service extends Model
         return $this->hasMany(ServiceImage::class);
     }
 
+    public function categories(): HasMany
+    {
+        return $this->hasMany(ServiceSelectedCategory::class);
+    }
+
 }

@@ -46,11 +46,11 @@ onMounted(initSwiper);
                         <div>
                             <div class="swiper">
                                 <div class="swiper-wrapper">
-                                    <div class="swiper-slide h-full">
-                                        <img class="h-full object-cover" :src="`/storage/${ service.cover.file_path }`"  alt="" />
+                                    <div class="swiper-slide">
+                                        <img class="h-[250px] w-full object-cover" :src="`/storage/${ service.cover.file_path }`"  alt="" />
                                     </div>
-                                    <div class="swiper-slide h-full" v-for="(image, index) in service.images" :key="index">
-                                        <img class="h-full object-cover" :src="`/storage/${ image.file_path }`"  alt="" />
+                                    <div class="swiper-slide" v-for="(image, index) in service.images" :key="index">
+                                        <img class="h-[250px] w-full object-cover" :src="`/storage/${ image.file_path }`"  alt="" />
                                     </div>
                                 </div>
                                 <div class="swiper-pagination"></div>
@@ -66,7 +66,7 @@ onMounted(initSwiper);
                                 </div>
                             </div>
                         </div>
-                        <div class="p-5">
+                        <div class="p-5 h-[260px] flex flex-col">
                             <a :href="`/services/${service.id}`">
                                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                                     {{ service.service_title }}
@@ -75,26 +75,28 @@ onMounted(initSwiper);
                             <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
                                 {{ service.service_description }}
                             </p>
-                            <hr>
-                            <div class="mt-2 flex gap-2 items-center">
-                                <div>
-                                    <img class="w-10 h-10 rounded-full" :src="`/storage/${ service.user.details.avatar }`" alt="">
-                                </div>
-                                <div class="flex flex-col">
-                                    <a class="text-sm font-medium text-blue-600" :href="`/user/${service.user.login}`">
-                                        {{ service.user.details ? service.user.details.name : service.user.login }}
-                                    </a>
-                                    <p v-if="service.user.details" class="text-sm text-gray-800">{{ service.user.details.profession }}</p>
+                            <div class="mt-auto mb-3 flex">
+                                <span v-for="category in service.categories" :key="category.id" class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500">
+                                    {{ category.name }}
+                                </span>
+                            </div>
+                            <div class="">
+                                <hr>
+                                <div class="mt-3 flex gap-2 items-center">
+                                    <div>
+                                        <img class="w-10 h-10 rounded-full" :src="`/storage/${ service.user.details.avatar }`" alt="">
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <a class="text-sm font-medium text-blue-600" :href="`/user/${service.user.login}`">
+                                            {{ service.user.details ? service.user.details.name : service.user.login }}
+                                        </a>
+                                        <p v-if="service.user.details" class="text-sm text-gray-800">{{ service.user.details.profession }}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                service index
-                <pre>
-                    {{services}}
-                </pre>
 
             </div>
         </div>

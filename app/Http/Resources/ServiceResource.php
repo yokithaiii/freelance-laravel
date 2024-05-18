@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\JobCategory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -15,6 +16,11 @@ class ServiceResource extends JsonResource
     public function toArray(Request $request): array
     {
         $user = $this->user;
+
+        foreach ($this->categories as $category) {
+            $selectedCategories[] = JobCategory::find($category->category_id);
+        }
+
         return [
             'id' => $this->id,
             'service_title' => $this->service_title,
@@ -27,6 +33,7 @@ class ServiceResource extends JsonResource
                 'file_path' => $this->cover->file_path,
             ],
             'images' => $this->images,
+            'categories' => $selectedCategories,
             'user' => [
                 'id' => $user->id,
                 'login' => $user->login,

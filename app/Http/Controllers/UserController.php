@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Events\SendLikeEvent;
+use App\Http\Resources\ServiceResource;
+use App\Models\Service;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -40,8 +42,14 @@ class UserController extends Controller
     public function show(string $login): Response
     {
         $user = User::query()->where('login', $login)->with('detailInfo')->first();
+
+        $services = Service::with('cover', 'images', 'categories', 'user.detailInfo')
+            ->where('user_id', $user->id)
+            ->get();
+
         return Inertia::render('User/User', [
             'user' => $user,
+            'services' => ServiceResource::collection($services),
         ]);
     }
 
