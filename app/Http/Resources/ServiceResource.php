@@ -42,6 +42,8 @@ class ServiceResource extends JsonResource
                     'name' => $user->detailInfo->name,
                     'profession' => $user->detailInfo->profession,
                     'avatar' => $user->detailInfo->avatar,
+                    'contact_phone' => $user->detailInfo->contact_phone,
+                    'contact_telegram' => $user->detailInfo->contact_telegram,
                 ]
             ]
         ];
