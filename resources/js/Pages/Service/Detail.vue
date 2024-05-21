@@ -1,16 +1,26 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import Swiper from "swiper";
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import {Navigation, Pagination} from "swiper/modules";
-import {onMounted} from "vue";
+import { Navigation, Pagination } from "swiper/modules";
+import { onMounted, ref } from "vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import TextInput from "@/Components/TextInput.vue";
+import { Modal } from "flowbite";
 
 const props = defineProps({
     service: Object,
 })
+
+const form = useForm({
+    message: '',
+});
+
+const modalEl = ref(null);
+const modalInstance = ref(null);
 
 const initSwiper = () => {
     new Swiper('.swiper', {
@@ -24,6 +34,42 @@ const initSwiper = () => {
         },
     });
 }
+
+const initModal = () => {
+    const options = {
+        placement: 'bottom-right',
+        backdrop: 'dynamic',
+        backdropClasses:
+            'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40',
+        closable: true,
+    };
+
+    const instanceOptions = {
+        id: 'deleteModal',
+        override: true
+    };
+
+    modalInstance.value = new Modal(modalEl.value, options, instanceOptions);
+}
+
+const showModal = () => {
+    initModal();
+    modalInstance.value.show();
+};
+
+const submit = (id) => {
+    try {
+        form.post(route('service.order', { id: id }));
+        form.message = '';
+    } catch (e) {
+        console.error('Ошибка при отправке сообщения:', e);
+    } finally {
+        if (modalInstance.value) {
+            modalInstance.value.hide();
+        }
+    }
+
+};
 
 onMounted(initSwiper);
 </script>
@@ -136,7 +182,7 @@ onMounted(initSwiper);
                                 <p class="font-medium">Дней на выполнение: {{ service.data.service_term_days }}</p>
                             </div>
                             <div>
-                                <a :href="`/offers/job=3`" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-normal text-md text-white hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <a @click="showModal" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-normal text-md text-white hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     Заказать услугу
                                     <svg class="w-6 h-6 text-white ms-2 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"/>
@@ -145,6 +191,43 @@ onMounted(initSwiper);
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main modal -->
+        <div id="deleteModal" ref="modalEl" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
+            <div class="relative p-4 w-full max-w-md h-full md:h-auto">
+                <!-- Modal content -->
+                <div class="relative p-4 text-center bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+                    <p class="font-medium mb-2">Заказать услугу</p>
+
+                    <hr>
+
+                    <div class="mt-2 text-left bg-gray-200 rounded-md p-4">
+                        <p class="text-sm font-medium">{{service.data.service_title}}</p>
+                        <p class="text-sm">{{service.data.service_description}}</p>
+                        <p class="text-sm">Цена: {{ service.data.service_price }} ₽</p>
+                        <p class="text-sm">Дней на выполнение: {{ service.data.service_term_days }}</p>
+                    </div>
+
+                    <div class="mt-4">
+                        <InputLabel for="message" value="Сообщение" class="text-left" />
+
+                        <TextInput
+                            id="message"
+                            type="text"
+                            class="mt-1 block w-full"
+                            v-model="form.message"
+                        />
+                    </div>
+
+                    <div class="mt-4 flex justify-end">
+                        <button @click.prevent="submit(service.data.id)" type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-normal text-md text-white hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 ms-4">
+                            Отправить
+                        </button>
+                    </div>
+
                 </div>
             </div>
         </div>

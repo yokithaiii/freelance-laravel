@@ -11,6 +11,7 @@ use App\Models\ServiceCover;
 use App\Models\ServiceImage;
 use App\Models\ServiceSelectedCategory;
 use App\Services\CategoryService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -107,5 +108,10 @@ class ServiceController extends Controller
         return Inertia::render('Service/Detail', [
             'service' => ServiceResource::make($service),
         ]);
+    }
+
+    public function order(Service $service, Request $request)
+    {
+        dd($service);
     }
 }
