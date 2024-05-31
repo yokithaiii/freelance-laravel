@@ -3,14 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Actions\BuildCategoryTreeAction;
+use App\Http\Requests\ServiceOrderRequest;
 use App\Http\Requests\ServiceStoreRequest;
+use App\Http\Resources\MessageResource;
+use App\Http\Resources\ServiceOrderResource;
 use App\Http\Resources\ServiceResource;
 use App\Models\JobCategory;
 use App\Models\Service;
 use App\Models\ServiceCover;
 use App\Models\ServiceImage;
+use App\Models\ServiceOrder;
 use App\Models\ServiceSelectedCategory;
 use App\Services\CategoryService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -110,8 +115,28 @@ class ServiceController extends Controller
         ]);
     }
 
-    public function order(Service $service, Request $request)
+    public function order(Int $serviceId, ServiceOrderRequest $request): JsonResponse
     {
-        dd($service);
+        $service = Service::find($serviceId);
+        if (!$service) {
+            return response()->json(['error' => 'service not found.'], 404);
+        }
+
+        $validatedDate = $request->validated();
+
+        if (!isset($validatedDate['message'])) {
+            return response()->json(['error' => 'message not found.'], 404);
+        }
+
+        $order = ServiceOrder::firstOrCreate([
+             'message' => $validatedDate['message'],
+             'user_id' => Auth::id(),
+             'service_id' => $service->id,
+        ]);
+
+        return response()->json([
+            'message' => 'order created successfully.',
+            'data' => ServiceOrderResource::make($order),
+        ], 201);
     }
 }
