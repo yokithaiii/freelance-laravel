@@ -181,13 +181,33 @@ onMounted(initSwiper);
                             <div>
                                 <p class="font-medium">Дней на выполнение: {{ service.data.service_term_days }}</p>
                             </div>
-                            <div>
-                                <a @click="showModal" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-normal text-md text-white hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <div v-if="service.data.user.id !== $page.props.auth.user.id">
+                                <a @click="showModal" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-normal text-md text-white hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     Заказать услугу
                                     <svg class="w-6 h-6 text-white ms-2 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"/>
                                     </svg>
                                 </a>
+                            </div>
+                            <div v-else>
+                                Это вы
+                            </div>
+                            <hr>
+                            <div class="flex items-start gap-2">
+                                <img
+                                    v-if="service.data.user.details"
+                                    class="h-14 w-14 rounded-full"
+                                    :src="`/storage/${service.data.user.details.avatar}`"
+                                    alt=""
+                                >
+                                <div class="flex flex-col">
+                                    <p class="font-medium">
+                                        {{ service.data.user.details ? service.data.user.details.name : service.data.user.login }}
+                                    </p>
+                                    <p v-if="service.data.user.details"  class="font-regular text-sm">
+                                        {{ service.data.user.details.profession }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
