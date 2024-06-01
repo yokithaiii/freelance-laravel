@@ -66,7 +66,6 @@ onMounted(initSwiper);
                                 </div>
                                 <hr class="my-6 border-t border-gray-300">
                                 <div class="flex flex-col">
-                                    <span class="text-gray-700 uppercase font-bold tracking-wider mb-2">Contacts</span>
                                     <ul>
                                         <li v-if="user.email" class="mb-2">
                                             <a href="#" class="flex items-center gap-2">
@@ -115,7 +114,10 @@ onMounted(initSwiper);
                             </div>
                             <div class="bg-white shadow rounded-lg p-6 mt-6">
                                 <h2 class="text-xl font-bold mb-4">My services</h2>
-                                <div>
+                                <div v-if="services.data.length <= 0">
+                                    <p>У этого пользователя нет услуг.</p>
+                                </div>
+                                <div v-else>
                                     <div class="grid grid-cols-1 gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2" v-if="services.data.length > 0">
                                         <div v-for="service in services.data" :key="service.id"
                                              class="max-w bg-white border border-gray-200 rounded-lg shadow overflow-hidden">

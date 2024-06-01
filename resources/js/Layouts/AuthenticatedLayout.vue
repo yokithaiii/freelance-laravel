@@ -12,6 +12,17 @@ const store = useStore();
 
 const showingNavigationDropdown = ref(false);
 const notifications = computed(() => store.state.notifications);
+const accountType = computed(() => store.getters.accountType);
+
+const switchAccType = (type) => {
+    if (type === 'customer' || type === 'executor') {
+        store.dispatch('switchAccountType', type).then(() => {
+            window.location.href = route('dashboard');
+        });
+    } else {
+        console.error('Invalid account type');
+    }
+};
 
 onMounted(() => {
     const echoChannel = window.Echo.channel(`notifications`)
@@ -42,10 +53,10 @@ onMounted(() => {
                             <!-- Navigation Links -->
                             <div class="hidden md:block">
                                 <div class="ml-10 flex items-baseline space-x-4">
-                                    <NavLink :href="route('service.index')" :active="route().current('service.index')">
+                                    <NavLink v-if="accountType === 'customer'" :href="route('service.index')" :active="route().current('service.index')">
                                         Services
                                     </NavLink>
-                                    <NavLink :href="route('jobs.index')" :active="route().current('jobs.index')">
+                                    <NavLink v-if="accountType === 'executor'" :href="route('jobs.index')" :active="route().current('jobs.index')">
                                         Jobs
                                     </NavLink>
                                     <NavLink :href="route('chat.index')" :active="route().current('chat.index')">
@@ -155,11 +166,12 @@ onMounted(() => {
 
                                         <template #content>
                                             <div class=" divide-y divide-gray-100 rounded-lg">
-                                                <div class="px-4 py-2 text-sm text-gray-900 dark:text-white">
-                                                    <div>{{ $page.props.auth.user.login }}</div>
-                                                    <div class="font-medium truncate">{{
-                                                            $page.props.auth.user.email
-                                                        }}
+                                                <div class="py-2 px-4">
+                                                    <p class="text-sm">Переключиться на: </p>
+                                                    <div class="flex gap-1 items-center">
+                                                        <a class="text-sm text-blue-600 cursor-pointer" @click="switchAccType('customer')">Заказчика</a>
+                                                        <span class="text-gray-400 text-sm">|</span>
+                                                        <a class="text-sm text-blue-600 cursor-pointer" @click="switchAccType('executor')">Исполнителя</a>
                                                     </div>
                                                 </div>
                                                 <ul class="py-2 text-sm text-gray-700 dark:text-gray-200"
